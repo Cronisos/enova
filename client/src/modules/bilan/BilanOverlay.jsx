@@ -41,7 +41,9 @@ export default function BilanOverlay() {
   const footer = (
     <>
       <span>{f?.genre === 'session' ? 'Le jeu est fermé : à la prochaine, commandant' : f ? 'Changement de mode' : 'Bilan'}</span>
-      <button type="button" className="blo-btn" onClick={fermer} title="Fermer">✕</button>
+      {/* Survol signalé au MO : sans lui la fenêtre laisse passer les clics au jeu, et ✕ ne fermait rien (19 nov. 2026) */}
+      <button type="button" className="blo-btn" onClick={fermer} title="Fermer le bilan"
+        onMouseEnter={() => window.eliteOverlay?.setHover?.(true)} onMouseLeave={() => window.eliteOverlay?.setHover?.(false)}>✕ Fermer</button>
     </>
   );
   return (

@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { useEvent } from '../../core/stream.js';
 import { useHiddenWindow, useOverlayPage } from '../../core/hud.jsx';
 import { meters, wpApi } from './api.js';
-import { ORE_COLORS } from './oreColors.js';
+import { ORE_COLORS, couleurMinerai } from './oreColors.js';
 import { TOP_CSS } from './SweepTop.jsx';
 import { ajouterChiffre, chercherMinerais, FOREUSES, numeroSaisi } from './poseVue.js';
 
@@ -110,7 +110,7 @@ export function PoseForm({ brouillon, hover = {}, onDone }) {
       {brouillon.eep?.length > 0 && (
         <div className="sw-pose-ores">
           {brouillon.eep.map((o) => (
-            <button key={o} type="button" className={label === o ? 'is-on' : ''} style={{ '--c': ORE_COLORS[o] || '#f4f6f8' }} title="Lu sur le panneau de cible de cet EEP" {...hover} onClick={() => setLabel(o)}>📷 {o}</button>
+            <button key={o} type="button" className={label === o ? 'is-on' : ''} style={{ '--c': couleurMinerai(o) }} title="Lu sur le panneau de cible de cet EEP" {...hover} onClick={() => setLabel(o)}>📷 {o}</button>
           ))}
         </div>
       )}

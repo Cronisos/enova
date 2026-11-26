@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useEvent } from '../../core/stream.js';
 import { useHiddenWindow, useOverlayPage } from '../../core/hud.jsx';
 import { wpApi } from './api.js';
-import { ORE_COLORS, UNKNOWN_ORE } from './oreColors.js';
+import { couleurMinerai } from './oreColors.js';
 import NomSysteme from '../../core/NomSysteme.jsx';
 
 // « À chercher en priorité » : les minerais du Rhino classés par meilleure vente, en deux onglets (toute la galaxie,
@@ -85,7 +85,7 @@ function SystemTop({ markets, onLoadArdent, hover }) {
       {list.map((o, i) => (
         <div key={o.ore} className="sw-top-row" title={`Meilleur prix : ${o.station}`}>
           <b>{i + 1}</b>
-          <i style={{ background: ORE_COLORS[o.ore] || UNKNOWN_ORE }} />
+          <i style={{ background: couleurMinerai(o.ore) }} />
           <span>{o.ore} <em>({price(o.sell)})</em></span>
           <small>demande <em>{o.demand.toLocaleString('fr-FR')}</em> · {o.stations > 1 ? `${o.stations} stations` : o.station}</small>
         </div>
@@ -122,7 +122,7 @@ export function TopOresPanel({ onClose, hover = {}, markets, onLoadArdent, class
           {top?.ores.map((o, i) => (
             <div key={o.ore} className="sw-top-row" title={`${o.station} · ${o.system}${o.pad ? ` · piste ${o.pad}` : ''}`}>
               <b>{i + 1}</b>
-              <i style={{ background: ORE_COLORS[o.ore] || UNKNOWN_ORE }} />
+              <i style={{ background: couleurMinerai(o.ore) }} />
               <span>{o.ore} <em>({price(o.sell)})</em></span>
               <small>{o.station} · <NomSysteme nom={o.system} /></small>
             </div>

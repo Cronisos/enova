@@ -6,6 +6,7 @@
 
 import { hasRole, inRole, isMode, POLYVALENT } from './modes.js';
 import { REAL_TIMERS } from './timers.js';
+import { estRare } from './rares.js';
 
 export const DISMISS_MS = 30 * 60 * 1000;
 export const EXPIRE_MS = 15 * 60 * 1000; // proposition restée sans réponse : elle s'efface
@@ -58,6 +59,18 @@ export function guessFromEvent(ev, { inSrv = false, onFoot = false } = {}) {
       return isConstructionDock(ev) ? { mode: 'colonisation', reason: 'à quai à un chantier de construction' } : null;
     case 'ColonisationContribution':
       return { mode: 'colonisation', reason: 'livraison à un chantier' };
+    case 'MarketBuy':
+      // Une marchandise rare achetée (relevé core/rares.js) : on fait du commerce de rares
+      return estRare(ev.Type) ? { mode: 'rares', reason: 'marchandise rare achetée' } : null;
+    case 'ApproachSettlement':
+      // Ruines et structures des Gardiens : leur nom interne commence par « $Ancient » (relevé du 22 nov. 2026)
+      return /^\$ancient/i.test(String(ev.Name || '')) ? { mode: 'gardiens', reason: 'site gardien en vue' } : null;
+    case 'MaterialCollected':
+      // Matériau des Gardiens (site, sentinelle, obélisque) : un seul suffit, on ne les trouve que là
+      return /^(guardian_|ancient\w+data$)/i.test(String(ev.Name || '')) ? { mode: 'gardiens', reason: 'matériau gardien ramassé' } : null;
+    case 'PowerplayCollect':
+      // Ressources allouées par ta puissance (dossiers de presse, contrats sous scellé…) : chargées pour être livrées
+      return { mode: 'powerdelivery', reason: 'ressources Powerplay chargées' };
     default:
       return null;
   }

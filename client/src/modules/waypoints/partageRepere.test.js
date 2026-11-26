@@ -9,6 +9,7 @@ test('Rhino, minage en vaisseau et autres repères : trois types séparés', () 
   assert.equal(genreRepere({ category: 'mining', vehicle: 'ship' }), 'repere-minage');
   assert.equal(genreRepere({ category: 'mining' }), 'repere-minage');
   assert.equal(genreRepere({ category: 'bio', vehicle: 'srv' }), 'repere');
+  assert.equal(genreRepere({ category: 'guardian', vehicle: 'srv', siteNumber: 2 }), 'repere-gardien');
 });
 
 test('ce qui part : le lieu et la description, pas le suivi personnel', () => {

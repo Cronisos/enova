@@ -20,14 +20,19 @@
 2. **Créer un plan** : depuis la carte d'un vaisseau (Mes vaisseaux, « Créer un plan » charge sa config
    actuelle), ou dans **Ingénierie → Nouveau plan** : partir d'un vaisseau vierge, ou **importer un build EDSY**
    (lien `#/L=…`, version 15 et plus) ou un export JSON au format Loadout.
-3. Sur le plan : pour chaque module, modification, grade visé et effet expérimental. « Tout en G5 » applique la
-   modification actuelle (ou la plus courante) au grade maximum. « Calculer » donne les matériaux nécessaires,
+3. Sur le plan : un tableau, une ligne par emplacement : **à bord aujourd'hui** (la config lue dans le journal la
+   dernière fois que tu es monté dans le vaisseau), **visé par le plan**, **reste à faire** (« à monter » quand le
+   module visé n'est pas celui à bord, puis le nombre d'applications ; une coche quand c'est fait). « Seulement ce qui
+   reste à faire » cache le reste. La page est en lecture seule : un build se compose dans le constructeur.
+   « Modifier le plan » ouvre les réglages pour une retouche (module, modification, grade, effet expérimental,
+   « Revenir à la config actuelle », et « Tout en G5 », qui applique la modification actuelle ou la plus courante au
+   grade maximum). « Calculer » donne les matériaux nécessaires,
    possédés et manquants, avec la méthode d'obtention et l'ingénieur à aller voir.
 4. **Tableau de bord** : plusieurs vaisseaux à la fois, avec un stock commun (un matériau n'est jamais compté deux
    fois) et les plans faisables tout de suite. Seuls les plans ajoutés y sont, chacun en carte (image, nom, modèle,
    avancement) ; « − Retirer » l'en sort sans le supprimer. « Ajouter un plan » ouvre une modale : un clic sur un de
    tes autres plans l'ajoute, ou « Créer un nouveau plan ». Le tableau « Ce qui manque » est rangé comme les échangeurs (catégorie, grade).
-   **Échangeur de matériaux** (sous « Ce qui manque ») : pour chaque matériau manquant, quoi donner chez l'échangeur,
+   **Échangeur de matériaux** (sous « Ce qui manque ») : en tête, le verdict, en tournure impersonnelle : « Échanges suffisants » si tous les échanges proposés couvrent ce qui manque, sinon « Échanges insuffisants » avec la liste de ce qui reste à collecter et pourquoi (ne s'échange pas, rien à donner, pas assez à donner). Puis, pour chaque matériau manquant, quoi donner chez l'échangeur,
    en ne prenant que ce que les plans n'utilisent pas ; d'abord un matériau à son plafond (perdu à la prochaine
    collecte), puis la même catégorie (sans pénalité), puis le moins cher. Lots entiers comme au comptoir (13,5 pour 1 :
    2 donnés pour 27). Taux du dépôt des règles (`regles/echangeurs.js` : monter d'un grade 6 pour 1, descendre 1 pour

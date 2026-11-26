@@ -63,11 +63,11 @@ export function RebuyCell({ rebuy: r }) {
   );
 }
 
-/** Mode de jeu (Open, Solo, groupe privé) pour la case Crédits de la fenêtre en jeu. */
+/** Mode de jeu (Open, Solo, groupe privé), tout à droite de la barre de titre de la fenêtre en jeu (l’auteur, 19 nov. 2026). */
 export function ModeJeu({ rebuy: r }) {
   if (!r?.mode) return null;
   // Styles en ligne : la feuille de la case Rachat n'est là que quand la case l'est
-  return <span style={{ float: 'right', color: modeColor(r.mode), fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>{modeText(r.mode)}</span>;
+  return <span style={{ color: modeColor(r.mode), fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase' }}>{modeText(r.mode)}</span>;
 }
 
 /** Bloc du panneau Coup d'œil (app et page plein écran). */

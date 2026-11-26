@@ -60,7 +60,7 @@ export const PARCOURS_FENETRES_COUP_DOEIL = [
         fenetre: GLANCE,
         cible: tuto('fej-credits'),
         titre: 'Crédits',
-        texte: 'Ton solde, en gros et arrondi, puis au crédit près dessous. En haut à droite, ton mode de jeu : Open, Solo ou groupe privé. Open, où tu croises d’autres joueurs, ressort en orange.',
+        texte: 'Ton solde, en gros et arrondi, puis au crédit près dessous. Tout en haut à droite de la fenêtre, ton mode de jeu : Open, Solo ou groupe privé. Open, où tu croises d’autres joueurs, ressort en orange.',
       },
       {
         fenetre: GLANCE,

@@ -192,6 +192,9 @@ const CSS = `
 }
 .hud-panel-head .hud-title { font-size: 10px; letter-spacing: .2em; }
 .hud-size { -webkit-app-region: no-drag; display: flex; gap: 4px; margin-left: auto; }
+/* Mention à droite de la barre de titre (Coup d'œil : le mode de jeu) */
+.hud-aside { margin-left: auto; white-space: nowrap; }
+.hud-aside + .hud-size { margin-left: 0; }
 .hud-size .hud-pin { width: 22px; height: 18px; font-size: 11px; opacity: 1; margin: 0; }
 .hud-panel-body { flex: 0 1 auto; min-height: 0; overflow: hidden; padding: 7px 10px 4px; }
 /* Ligne du bas : contenu de la page et bouton de déplacement. Marge à gauche : le coin est coupé */
@@ -336,10 +339,17 @@ export function useOverlayPage() {
 
   // Le reste de la fenêtre laisse passer les clics au jeu : seul le survol d'un bouton la rend cliquable
   const hover = overlay && { onMouseEnter: () => overlay.setHover(true), onMouseLeave: () => overlay.setHover(false) };
+  // En déplacement, un bouton de plus : ↔ centre la fenêtre de gauche à droite sur son écran (l’auteur, 19 nov. 2026 :
+  // « je galère à les centrer »)
   const pin = overlay && (
-    <button className="hud-pin" title={editing ? 'Fixer ici' : 'Déplacer'} {...hover} onClick={() => overlay.toggleEdit()}>
-      {editing ? '📌' : '✥'}
-    </button>
+    <>
+      {editing && overlay.centerH && (
+        <button className="hud-pin" title="Centrer horizontalement sur l’écran" {...hover} onClick={() => overlay.centerH()}>↔</button>
+      )}
+      <button className="hud-pin" title={editing ? 'Fixer ici' : 'Déplacer'} {...hover} onClick={() => overlay.toggleEdit()}>
+        {editing ? '📌' : '✥'}
+      </button>
+    </>
   );
   return { editing, pin, overlay, hover };
 }
@@ -463,11 +473,12 @@ const STEP = 40;
 /**
  * Fenêtre libre de l'overlay (Coup d'œil…) : contenu sur fond sombre translucide.
  * footer : contenu de la ligne du bas, où se trouve aussi le bouton de déplacement.
+ * aside : mention à droite de la barre de titre (Coup d'œil : le mode de jeu).
  * autoHeight : la fenêtre prend d'elle-même la hauteur de son contenu (la largeur reste réglable avec ◂ ▸).
  * switchNotice : la ligne du bas montre l'avis de bascule vers un mode sans fenêtre (Commerce), avec Annuler, à la
  * place de footer : sans elle, rien ne le montrerait en jeu.
  */
-export function PanelOverlay({ title, children, footer, autoHeight = false, switchNotice = false }) {
+export function PanelOverlay({ title, aside = null, children, footer, autoHeight = false, switchNotice = false }) {
   const { editing, pin, overlay, hover } = useOverlayPage();
   const grow = (dw, dh) => overlay?.grow(dw, dh);
   const panel = useRef(null);
@@ -497,6 +508,7 @@ export function PanelOverlay({ title, children, footer, autoHeight = false, swit
     <div ref={panel} className={`hud-panel ${editing ? 'hud-editing' : ''}`}>
       <div className="hud-panel-head">
         <span className="hud-title">{title}</span>
+        {aside && <span className="hud-aside">{aside}</span>}
         {editing && (
           <span className="hud-size">
             <button className="hud-pin" title="Moins large" onClick={() => grow(-STEP, 0)}>◂</button>

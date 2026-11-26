@@ -3,11 +3,11 @@ import { useNavigate, useParams } from 'react-router';
 import { engApi, useEngineeringRefresh } from '../api.js';
 import ShipImage from '../../../core/ShipImage.jsx';
 import MaterialTable from '../components/MaterialTable.jsx';
-import Tile from '../../../core/Tile.jsx';
 import { int, pct } from '../../../core/format.js';
 import ExternalLinks from '../../../core/ExternalLinks.jsx';
 import RuleBadge from '../components/RuleBadge.jsx';
 import ValidationBlock from '../components/ValidationBlock.jsx';
+import { aFaire, bilan, ligne, texteModif } from '../planVue.js';
 import { engineerRankSummary, extraMaterialCells, extraMaterialsNote, extraSummary, moduleRankLines, moduleRollsTitle, orderText, rankedEngineers, rankRollsSub, stepEngineerText } from '../rankView.js';
 
 const GROUPS = [
@@ -17,13 +17,19 @@ const GROUPS = [
   ['internal', 'Modules internes'],
 ];
 
-/** Écran d'un vaisseau : modules, modification, grade, effet expérimental, puis calcul. */
+/**
+ * Écran d'un plan : pour chaque emplacement, ce qui est à bord aujourd'hui, ce que le plan vise et ce qui reste à faire ;
+ * puis le calcul (matériaux, rangs, ingénieurs). Lecture seule par défaut : un build se compose dans le constructeur,
+ * « Modifier le plan » ouvre les réglages pour une retouche sur place.
+ */
 export default function PlanPage() {
   const { id } = useParams();
   const [view, setView] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [showCalc, setShowCalc] = useState(false);
+  const [edition, setEdition] = useState(false);
+  const [resteSeul, setResteSeul] = useState(false);
   const calcRef = useRef(null);
   const navigate = useNavigate();
 
@@ -63,35 +69,40 @@ export default function PlanPage() {
 
   if (!view) return <p className="muted">{error || 'Chargement…'}</p>;
   const c = view.calc;
+  const statuts = new Map(c.modules.map((m) => [m.slot, m]));
+  const lignes = view.slots.map((sl) => ({ slot: sl, l: ligne(sl, statuts.get(sl.key), view.groups[sl.grp]) }));
+  const b = bilan(lignes.map((x) => x.l));
+  // Hors édition, un emplacement vide des deux côtés ne dit rien : il n'est pas montré
+  const montrees = lignes.filter((x) => (edition ? true : resteSeul ? aFaire(x.l) : x.l.etat !== 'vide'));
 
   return (
     <div className="page">
-      <header className="plan-header panel">
-        <ShipImage shipKey={view.ship.key} hasImage={view.ship.hasImage} editable size="lg" />
-        <div className="plan-header-body">
-          <h1>{view.plan.name}</h1>
-          <p className="muted">
-            {view.ship.model} · {view.ship.live ? 'config actuelle lue dans le journal, mise à jour en temps réel' : 'vaisseau vierge'}
-          </p>
-          <div data-tuto="ingenierie-plan-chiffres" className="tiles tiles-4 compact-tiles">
-            <Tile label="Matériaux réunis" value={pct(c.progress)} tone={c.progress >= 1 ? 'good' : c.progress > 0.6 ? undefined : 'warn'} />
-            <Tile label="Modules terminés" value={`${c.modulesDone}/${c.modulesTotal}`} tone={c.modulesTotal && c.modulesDone === c.modulesTotal ? 'good' : undefined} />
-            <Tile label="Matériaux manquants" value={int(c.missingCount)} tone={c.missingCount ? 'bad' : 'good'} />
-            <Tile
-              label="Applications restantes"
-              value={int(c.rolls)}
-              sub={rankRollsSub(c.rankExtra)}
-              tone={c.rankExtra?.rolls ? 'warn' : undefined}
-            />
+      <header className="plan-tete panel">
+        <ShipImage shipKey={view.ship.key} hasImage={view.ship.hasImage} editable={edition} size="sm" />
+        <div className="plan-tete-corps">
+          <div className="plan-tete-titre">
+            <h1>{view.plan.name}</h1>
+            <span className="muted small">
+              {view.ship.live ? 'À bord : la config lue dans ton journal la dernière fois que tu es monté dans ce vaisseau' : 'Vaisseau vierge : rien à bord'}
+            </span>
+          </div>
+          <div data-tuto="ingenierie-plan-chiffres" className="plan-chiffres">
+            <Chiffre label="Matériaux réunis" value={pct(c.progress)} tone={c.progress >= 1 ? 'good' : c.progress > 0.6 ? '' : 'warn'} />
+            <Chiffre label="Modules terminés" value={`${c.modulesDone}/${c.modulesTotal}`} tone={c.modulesTotal && c.modulesDone === c.modulesTotal ? 'good' : ''} />
+            <Chiffre label="Matériaux manquants" value={int(c.missingCount)} tone={c.missingCount ? 'bad' : 'good'} />
+            <Chiffre label="Applications restantes" value={int(c.rolls)} sub={rankRollsSub(c.rankExtra)} tone={c.rankExtra?.rolls ? 'warn' : ''} />
           </div>
           <div data-tuto="ingenierie-plan-actions" className="form-actions">
-            <button className="btn" onClick={() => run(() => engApi.allG5(id))} disabled={busy}>Tout en G5</button>
-            {view.ship.live && (
+            <button data-tuto="ingenierie-plan-calculer" className="btn btn-primary" onClick={calculate} disabled={busy}>Calculer</button>
+            <button className={`btn ${edition ? 'btn-primary' : ''}`} onClick={() => setEdition((v) => !v)} aria-pressed={edition}>
+              {edition ? 'Fermer les réglages' : 'Modifier le plan'}
+            </button>
+            {edition && <button className="btn" onClick={() => run(() => engApi.allG5(id))} disabled={busy}>Tout en G5</button>}
+            {edition && view.ship.live && (
               <button className="btn" onClick={() => window.confirm('Revenir à la config actuelle du vaisseau ?') && run(() => engApi.reset(id))} disabled={busy}>
                 Revenir à la config actuelle
               </button>
             )}
-            <button data-tuto="ingenierie-plan-calculer" className="btn btn-primary" onClick={calculate} disabled={busy}>Calculer</button>
             <button className="btn btn-ghost bad" onClick={remove}>Supprimer le plan</button>
           </div>
           {error && <p className="bad">{error}</p>}
@@ -99,20 +110,50 @@ export default function PlanPage() {
         </div>
       </header>
 
-      {GROUPS.map(([g, title]) => {
-        const slots = view.slots.filter((s) => s.group === g);
-        if (!slots.length) return null;
-        return (
-          <section key={g} className="panel">
-            <h2>{title}</h2>
-            <div className="slot-list">
-              {slots.map((s) => (
-                <SlotRow key={s.key} slot={s} view={view} onChange={change} busy={busy} status={c.modules.find((m) => m.slot === s.key)} />
-              ))}
-            </div>
-          </section>
-        );
-      })}
+      <section className="panel">
+        <div className="plan-bilan">
+          <h2>Modules</h2>
+          <span className="small">
+            {b.monter > 0 && <><b className="plan-monter">{b.monter}</b> à monter · </>}
+            {b.retirer > 0 && <><b className="plan-monter">{b.retirer}</b> à retirer · </>}
+            <b className="warn">{b.modifier}</b> à modifier · <b className="good">{b.fait}</b> déjà bon{b.fait > 1 ? 's' : ''}
+          </span>
+          {!edition && (
+            <label className="small"><input type="checkbox" checked={resteSeul} onChange={(e) => setResteSeul(e.target.checked)} /> Seulement ce qui reste à faire</label>
+          )}
+        </div>
+        <div className="table-wrap">
+          <table className="table compact plan-table">
+            <thead>
+              <tr>
+                <th>Emplacement</th>
+                <th>À bord aujourd’hui</th>
+                <th aria-hidden="true" />
+                <th>Visé par le plan</th>
+                <th className="right">Reste à faire</th>
+              </tr>
+            </thead>
+            {GROUPS.map(([g, title]) => {
+              const du = montrees.filter((x) => x.slot.group === g);
+              if (!du.length) return null;
+              return (
+                <tbody key={g}>
+                  <tr className="plan-groupe"><th colSpan={5}>{title}</th></tr>
+                  {du.map(({ slot, l }) => (
+                    <SlotRow key={slot.key} slot={slot} l={l} view={view} onChange={change} busy={busy} edition={edition} status={statuts.get(slot.key)} />
+                  ))}
+                </tbody>
+              );
+            })}
+          </table>
+        </div>
+        {!montrees.length && <p className="good">Rien à faire : tout ce que vise le plan est déjà à bord, au bon niveau.</p>}
+        <p className="tiny muted">
+          « À monter » : le module visé n’est pas celui qui est à bord, il faut l’acheter ou le sortir du stockage, puis le
+          faire modifier. Le nombre d’applications compte les passages chez l’ingénieur (≈ : estimation). Pour changer ce
+          que vise le plan, refais le build dans le constructeur et réimporte-le, ou retouche-le ici avec « Modifier le plan ».
+        </p>
+      </section>
 
       {showCalc && (
         <div ref={calcRef} className="page">
@@ -132,84 +173,105 @@ export default function PlanPage() {
   );
 }
 
-/** Une ligne d'emplacement : config actuelle → config visée. */
-function SlotRow({ slot, view, onChange, busy, status }) {
+/** Un chiffre de l'en-tête : la valeur, puis ce qu'elle compte. */
+function Chiffre({ label, value, sub, tone }) {
+  return (
+    <span className="plan-chiffre" title={sub || undefined}>
+      <b className={tone || undefined}>{value}</b> {label}
+      {sub && <span className="muted"> ({sub})</span>}
+    </span>
+  );
+}
+
+const ETATS = {
+  monter: ['plan-pill-monter', 'à monter'],
+  retirer: ['plan-pill-monter', 'à retirer'],
+};
+
+/** Une configuration (à bord ou visée) : le module, puis sa modification. */
+function Config({ c, terne }) {
+  if (!c) return <span className="muted">Vide</span>;
+  return (
+    <span className={terne ? 'muted' : undefined}>
+      {c.nom}
+      <span className={`plan-modif ${c.modif ? '' : 'muted'}`}>{texteModif(c)}</span>
+    </span>
+  );
+}
+
+/** Une ligne d'emplacement : à bord aujourd'hui → visé → reste à faire. En édition, la colonne « visé » se règle. */
+function SlotRow({ slot, l, view, onChange, busy, edition, status }) {
   const options = view.optionSets[slot.optionSet] || [];
   const grp = view.groups[slot.grp] || { blueprints: [], specials: [] };
   const t = slot.target;
   const cur = slot.current;
   const bp = grp.blueprints.find((b) => b.key === t.blueprint);
   const maxGrade = bp ? Math.max(...bp.grades) : 0;
+  const pill = ETATS[l.etat];
 
   return (
-    <div data-tuto="ingenierie-plan-ligne" className={`slot-row ${status?.done === false ? 'slot-todo' : status?.done ? 'slot-done' : ''}`}>
-      <div className="slot-size">
-        <span className="size-badge">{slot.size ?? '—'}</span>
-      </div>
-      <div className="slot-current">
-        <div className="slot-label muted small">{slot.label}</div>
-        <div>{cur?.label || <span className="muted">Vide</span>}</div>
-        {cur?.blueprint && (
-          <div className="small">
-            <span className="accent">G{cur.grade}</span> {cur.blueprintLabel}
-            {cur.quality > 0 && cur.quality < 1 && <span className="muted"> ({Math.round(cur.quality * 100)} %)</span>}
-            {cur.experimentalLabel && <span className="pill pill-info">{cur.experimentalLabel}</span>}
-          </div>
-        )}
-      </div>
-      <div className="slot-target">
-        <select value={t.module || ''} disabled={busy} onChange={(e) => onChange(slot.key, { module: e.target.value || null })}>
-          <option value="">— Vide —</option>
-          {t.module && !options.some((o) => o.symbol === t.module) && <option value={t.module}>{t.label}</option>}
-          {options.map((o) => (
-            <option key={o.symbol} value={o.symbol}>{o.label}</option>
-          ))}
-        </select>
-        {grp.blueprints.length > 0 && (
-          <div className="slot-eng">
-            <select value={t.blueprint || ''} disabled={busy} onChange={(e) => onChange(slot.key, { blueprint: e.target.value || null })}>
-              <option value="">Sans modification</option>
-              {grp.blueprints.map((b) => (
-                <option key={b.key} value={b.key}>{b.name}</option>
+    <tr data-tuto="ingenierie-plan-ligne" className={`plan-ligne plan-${l.etat}`}>
+      <td className="plan-emplacement">
+        <span className="size-badge">{l.taille ?? '—'}</span> {l.emplacement}
+      </td>
+      <td><Config c={l.actuel} terne={l.etat === 'monter' || l.etat === 'retirer'} /></td>
+      <td className="plan-fleche" aria-hidden="true">{l.etat === 'fait' || l.etat === 'vide' ? '=' : '→'}</td>
+      <td>
+        {!edition ? <Config c={l.vise} terne={l.etat === 'fait'} /> : (
+          <div className="slot-target">
+            <select value={t.module || ''} disabled={busy} onChange={(e) => onChange(slot.key, { module: e.target.value || null })}>
+              <option value="">— Vide —</option>
+              {t.module && !options.some((o) => o.symbol === t.module) && <option value={t.module}>{t.label}</option>}
+              {options.map((o) => (
+                <option key={o.symbol} value={o.symbol}>{o.label}</option>
               ))}
             </select>
-            {t.blueprint && (
-              <span className="grade-picker">
-                {Array.from({ length: maxGrade }, (_, i) => i + 1).map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    disabled={busy}
-                    className={`grade-btn ${t.grade === g ? 'on' : ''} ${cur?.blueprintKey === t.blueprint && cur.module === t.module && g <= cur.grade ? 'have' : ''}`}
-                    onClick={() => onChange(slot.key, { grade: g })}
-                  >
-                    {g}
-                  </button>
-                ))}
-              </span>
-            )}
-            {t.blueprint && grp.specials.length > 0 && (
-              <select value={t.experimental || ''} disabled={busy} onChange={(e) => onChange(slot.key, { experimental: e.target.value || null })}>
-                <option value="">Sans effet expérimental</option>
-                {grp.specials.map((s) => (
-                  <option key={s.key} value={s.key}>{s.name}</option>
-                ))}
-              </select>
+            {grp.blueprints.length > 0 && (
+              <div className="slot-eng">
+                <select value={t.blueprint || ''} disabled={busy} onChange={(e) => onChange(slot.key, { blueprint: e.target.value || null })}>
+                  <option value="">Sans modification</option>
+                  {grp.blueprints.map((b) => (
+                    <option key={b.key} value={b.key}>{b.name}</option>
+                  ))}
+                </select>
+                {t.blueprint && (
+                  <span className="grade-picker">
+                    {Array.from({ length: maxGrade }, (_, i) => i + 1).map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        disabled={busy}
+                        className={`grade-btn ${t.grade === g ? 'on' : ''} ${cur?.blueprintKey === t.blueprint && cur.module === t.module && g <= cur.grade ? 'have' : ''}`}
+                        onClick={() => onChange(slot.key, { grade: g })}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </span>
+                )}
+                {t.blueprint && grp.specials.length > 0 && (
+                  <select value={t.experimental || ''} disabled={busy} onChange={(e) => onChange(slot.key, { experimental: e.target.value || null })}>
+                    <option value="">Sans effet expérimental</option>
+                    {grp.specials.map((sp) => (
+                      <option key={sp.key} value={sp.key}>{sp.name}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
             )}
           </div>
         )}
-      </div>
-      <div data-tuto="ingenierie-plan-statut" className="slot-status">
-        {status && (status.done ? <span className="pill pill-good">✓ Terminé</span> : (
-          <span
-            className={`pill ${status.blocked ? 'pill-bad' : 'pill-warn'}`}
-            title={moduleRollsTitle(status)}
-          >
-            {status.rolls} appl.{status.estimate ? ' ≈' : ''}
+      </td>
+      <td data-tuto="ingenierie-plan-statut" className="right plan-reste">
+        {pill && <span className={`pill ${pill[0]}`}>{pill[1]}</span>}
+        {l.appl > 0 && (
+          <span className={`pill ${l.bloque ? 'pill-bad' : 'pill-warn'}`} title={moduleRollsTitle(status)}>
+            {l.appl} appl.{l.estimation ? ' ≈' : ''}
           </span>
-        ))}
-      </div>
-    </div>
+        )}
+        {l.etat === 'fait' && <span className="good">✓</span>}
+      </td>
+    </tr>
   );
 }
 

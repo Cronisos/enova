@@ -144,6 +144,27 @@ Verdict en couleur : bon dès 40 000 cr/t, moyen dès 15 000, à laisser en dess
 Page `/materiaux` et HUD : matériaux récupérés pendant la session (bruts, manufacturés, encodés), par grade, et le
 dernier récupéré. Les grades viennent des données de référence téléchargées par l'ingénierie.
 
+## Mode « Livraison Powerplay »
+
+Pour les ressources que ta puissance te confie (dossiers de presse, contrats sous scellé, programmes d'Aisling…), à
+charger chez elle puis à livrer dans un système. Le bandeau en jeu (`/hud/powerdelivery`) a quatre cases : **En soute**
+(tonnes, et le nom de la ressource), **Mérites** gagnés par tes livraisons (et les tonnes livrées), **Mérites / h**,
+et **Recharge** : le temps restant avant de pouvoir recharger, puis « Possible » en vert. Le jeu donne un quota par
+tranche fixe de 30 minutes, et ces tranches ne partent pas de ton chargement (mesuré du 19 au 25 nov. 2026 : 250 t
+puis 250 t à 19 et 25 minutes d'écart ; deux pleins quotas pris à quelques secondes d'écart encadrent un changement
+de tranche). L'app déduit donc la grille des paires récentes de pleins quotas rapprochés
+(`server/src/modules/powerdelivery/grille.js`, 36 heures de mémoire : la grille tient d'un jour au lendemain mais se
+décale sur plusieurs jours). Sans paire récente, elle donne la seule certitude, marquée « au plus tard » : 30 minutes
+après le dernier chargement. Le plafond par tranche, qui dépend du rang, n'est pas connu (250 t aux rangs 193 à 212).
+La ligne du bas montre le dernier chargement ou la dernière livraison. La page (Activités › Livraison Powerplay) ajoute
+le détail par ressource (chargées, livrées, mérites, mérites par tonne) et les derniers mouvements.
+
+Le jeu note chaque chargement (`PowerplayCollect`) et chaque livraison (`PowerplayDeliver`), avec le nom de la
+ressource : rien n'est deviné. Les mérites comptés sont ceux que le jeu donne dans les dix secondes qui suivent une
+livraison (le journal du 19 nov. 2026 les donne à la même seconde) ; ceux d'une autre activité ne sont pas mélangés.
+Une ressource est reconnue en soute dès que tu l'as chargée ou livrée une fois depuis le lancement de l'app. Charger
+des ressources Powerplay propose de passer dans ce mode (`server/src/modules/powerdelivery/`).
+
 ## Signaux du système
 
 En mode **Sauvetage** ou **Matériaux**, une fenêtre s'ouvre d'elle-même par-dessus le jeu à chaque arrivée dans un
@@ -193,15 +214,18 @@ forme des noms de `CargoTransfer` (« steel » supposé, comme Cargo.json).
 
 ## Refroidissement FSD et « SCO prêt »
 
-Sans fenêtre : une jauge ronde par refroidissement, icône de propulseur au centre (FSD en bleu, SCO en orange), anneau qui
-se remplit, compte à rebours dessous ; prêt : vert, flamme allumée, pulsation (`client/src/modules/fsdcool/Jauge.jsx`).
+Sans fenêtre : un bandeau par refroidissement, d'après la maquette de Cronisos Lysiris (19 nov. 2026). Le moteur à
+gauche, le titre (« Refroidissement FSD » ou « SCO »), le compte à rebours à droite, et la courbe de la chaleur qui
+retombe, de l'orange au bleu : elle ne défile pas, elle fluctue sur place, et se vide de gauche à droite avec le temps écoulé. Seul le SCO a son bandeau (le jeu affiche déjà le
+refroidissement du FSD normal, pas celui du SCO) ; il affiche « PRÊT » en vert une seconde, et son bouton de
+déplacement apparaît quand la souris passe dessus (`client/src/modules/fsdcool/Jauge.jsx`, `vague.js`).
 La jauge du FSD apparaît d'elle-même par-dessus le jeu pendant le refroidissement du FSD hors saut, par exemple
 après une surcharge du supercruise (indicateur « FSD Cooldown », bit 18 de `Flags` dans `Status.json`). Le jeu ne
 donne pas sa durée : le compte à rebours reprend celle des refroidissements déjà mesurés (`server/data/fsd-cooldown.json`).
 
 **SCO prêt.** Le jeu ne dit pas non plus quand l'overdrive du supercruise (SCO) redevient disponible, et le bit
 « FSD Cooldown » ne se lève pas après un SCO. À la coupure du SCO (bit 20 de `Flags2`, 0x00100000, qui retombe), la
-même fenêtre montre « Prêt dans » en orange, puis **PRÊT** en vert pendant 4 s, et se ferme. Elle ne s'affiche qu'en
+même fenêtre montre « Prêt dans » en orange, puis **PRÊT** en vert pendant 1 s, et se ferme. Elle ne s'affiche qu'en
 supercruise. Si le FSD refroidit en même temps, les deux comptes à rebours sont côte à côte.
 
 La durée dépend de la génération du vaisseau (`Loadout.Ship`). Valeurs de départ d'après le plugin
@@ -330,3 +354,140 @@ contact de recherche et sauvetage avec leurs récompenses, et les mérites Power
   grade G1 → G5 (couleurs de la page Matériaux) et le total. Au survol, la liste (nom et nombre, du plus haut grade au
   plus bas) s'ouvre dans le cadre du HUD, de son haut jusqu'à la ligne, sans que la fenêtre change de taille. Ramasser un matériau
   compte comme une action (le chrono ne passe pas en pause « inactif »).
+
+## Mode « Gardiens »
+
+Le mode du module Gardiens (page et planificateur : docs/reperes.md). Il est proposé dès qu'un matériau des Gardiens est
+ramassé (`MaterialCollected` dont le nom commence par `guardian_`, ou une donnée d'obélisque `ancient…data`) : on
+n'en trouve que sur leurs sites.
+
+La session (`server/src/modules/gardiens/session.js`) compte ce qui est ramassé sur les sites : matériaux gardiens,
+données d'obélisque, segments de plan. Elle démarre au premier matériau gardien et **ne repart pas à zéro au lancement
+du jeu** : revenir au menu puis relancer est la façon de refaire un site. Elle repart en passant au mode, ou au bouton
+« Remettre à zéro » de la page.
+
+Le bandeau en jeu (`/hud/gardiens`) a quatre cases. **Plans** : segments en stock sur ceux que demande ton plan (sans
+plan coché : ceux gagnés pendant la session). Puis les trois matériaux de site qui manquent le plus à ton plan, en
+« stock / besoin » (cellules, conduits, composants, pièces de sentinelle, données d'obélisque) ; quand il en manque
+moins de trois, la place sert à ce qui a été ramassé pendant la session. Le calcul est celui du planificateur
+(`besoins.js`, `resteSurSite.js`), avec le stock lu chez Ingénierie à chaque matériau ramassé. Les matières premières,
+matériaux fabriqués et marchandises du plan ne sont pas dans le bandeau : ils ne se trouvent pas sur un site.
+
+## Alerte « Hangar sans véhicule »
+
+Si tu décolles (`Undocked`) avec un hangar acheté mais jamais garni, la fenêtre `/hud/hangar-vide` s'ouvre : le
+vaisseau et les hangars concernés. Elle se ferme au bout de deux minutes, au retour à quai, à l'achat d'un véhicule, ou
+au bouton ; « Il est plein » dit à l'app qu'elle se trompe (`POST /api/modules/hangar/plein`).
+
+Le suivi (`server/src/modules/hangar/state.js`) est refait à chaque démarrage depuis l'historique du journal, vaisseau
+par vaisseau :
+
+- un hangar acheté (`ModuleBuy`, véhicules planétaires ou chasseurs) arrive vide : constaté le 22 nov. 2026 ;
+- `RestockVehicle` (achat d'un véhicule) ne dit pas dans quel hangar il va : tous les hangars de ce genre du vaisseau
+  actuel sont alors tenus pour garnis. Deux hangars achetés et un seul rempli : pas d'alerte (limite connue) ;
+- un véhicule sorti (`LaunchSRV`, `LaunchFighter`) prouve qu'il y en avait un ;
+- un hangar déjà là quand le suivi commence, ou ressorti du stockage : contenu inconnu, jamais d'alerte ;
+- un véhicule détruit n'est pas suivi : un hangar peut en contenir plusieurs, et le journal ne dit pas combien.
+
+`GET /api/modules/hangar/etat` montre le vaisseau actuel, ses hangars et ce que l'app en sait.
+
+### Fenêtre « Site gardien » (`/hud/gardiens-site`)
+
+À l'approche d'un site (`ApproachSettlement` dont le nom interne commence par `$Ancient`), le mode Gardiens est
+proposé et cette fenêtre s'ouvre, même hors du mode : le nom du site, son corps, ses coordonnées (celles du journal, qui
+font foi sur la liste de 2018), et quand on connaît son type de plan (`guides.js`), la carte et l'ordre des pylônes.
+Elle reste ouverte au retour au menu (on relance pour refaire le site) et se ferme en quittant la planète, en
+supercruise, au saut, ou au bouton (`server/src/modules/gardiens/site.js`).
+
+**La carte est vivante, et c'est toi qui la fais.** Elle montre, nord en haut, ta position et ton cap (Status.json) et
+les points du site placés d'après leurs coordonnées, avec la distance et le côté où tourner pour chacun. Les points se
+marquent sur place, à l'endroit où tu es : « + Pylône », « + Machine », « + Relique » (`POST /site/points`), « Annuler »
+retire le dernier. Ils sont gardés par site (corps et forme) dans `gardiens-points.json` et reviennent à chaque visite.
+Pour Vela Dark Region DL-Y d91 5 A, les six pylônes relevés en 2018 sont montrés tant que tu n'as rien marqué toi-même.
+Calcul : `client/src/modules/gardiens/carteSite.js` ; points : `server/src/modules/gardiens/points.js`.
+
+**Schéma reconnu tout seul.** Pour les sites dont on connaît la carte (plans d'arme et plans de module), l'app garde
+un schéma : la place de la machine et des six pylônes, relevée à l'œil sur les cartes de la communauté (seules ces
+positions sont reprises, pas les images). Le joueur marque des points sans dire lesquels ; à partir de trois, l'app
+essaie toutes les façons de poser le schéma dessus (types respectés, échelle de 0,2 à 1,6 m par pixel) et garde celle
+qui colle au plus de points, chacun à 35 m près. Si deux poses font aussi bien, elle attend un point de plus plutôt que
+de deviner. Une fois le schéma reconnu : chaque pylône prend son nom et son numéro (son rang dans l'ordre de charge du
+guide), les points non marqués sont calculés (pointillés), un point marqué qui ne colle pas est signalé « hors schéma ».
+`server/src/modules/gardiens/calage.js` (`reconnaitre`, `caler`).
+
+**Tout ce qui se ramasse, des filtres, et un filtre d'erreurs.** Six types de points : pylône, machine, relique, panneau
+(panneau ou pilier destructible, matériaux dedans), sentinelle (là où il en sort une), matériau (le reste). Le schéma
+du site des plans d'arme porte aussi ses dix groupes de panneaux et ses trois sentinelles d'approche : une fois le
+schéma reconnu, ils apparaissent d'office, calculés. Dans la fenêtre, un bouton par type montre ou cache ce type (choix
+gardé sur le PC) ; la liste donne pylônes, machine et reliques en entier, et pour le reste les quatre plus proches.
+À chaque marquage, un point posé avec le mauvais type (« relique » au pied d'un pylône du schéma, à moins de 20 m) est
+corrigé d'office, et la fenêtre le dit (`points.corriger`, `reconnaitre` : `corrections`).
+
+## Mode « Commerce de rares »
+
+Pour le commerce de marchandises rares fait pour les mérites Powerplay. Le mode est proposé au premier achat d'une
+marchandise rare (`MarketBuy`).
+
+**Reconnaître une rare.** Le journal ne le dit pas : `MarketBuy` et `MarketSell` ne donnent que le nom. Le jeu le
+marque en revanche dans `Market.json` (`"Rare": true`). L'app embarque donc un relevé (`server/src/core/rares.js`,
+134 marchandises, tirées le 23 nov. 2026 d'un marché qui les listait toutes), et le module retient en plus toute rare
+marquée dans un marché ouvert en jeu que le relevé n'aurait pas.
+
+**Ce qui est compté** (`server/src/modules/rares/state.js`) : tonnes achetées et vendues, crédits dépensés et
+encaissés, bénéfice (prix de vente moins prix moyen payé, donné par le jeu dans `MarketSell`), et les mérites : ceux
+des lignes `PowerplayMerits` écrites dans les 15 secondes après un achat ou une vente de rares, rattachés à ce
+mouvement. Des mérites gagnés autrement pendant la session ne sont pas comptés.
+
+Le bandeau en jeu (`/hud/rares`) a quatre cases : **En soute** (tonnes de rares, et lesquelles), **Mérites** (avec
+les tonnes vendues et les mérites par tonne), **Mérites / h**, **Bénéfice** (et son taux horaire). La page
+(Activités › Commerce de rares) ajoute le détail par marchandise et les derniers mouvements.
+
+**Taux à l'heure stables.** Dans ce commerce tout tombe d'un coup, à la vente : un taux recalculé chaque seconde
+baisserait sans arrêt entre deux ventes. Les taux (mérites et bénéfice) sont donc une moyenne arrêtée à la dernière
+vente, sur le temps actif écoulé jusqu'à elle, et ne changent qu'à la vente suivante ; rien avant la première vente
+(`client/src/modules/rares/tauxStable.js`).
+
+## Mode « Commerce » : alertes et questions seulement dans ce mode
+
+Le module des routes commerciales suit les boucles dans tous les modes (elles se refont depuis le journal). En
+revanche, ses deux interruptions en direct ne se déclenchent qu'en mode Commerce : l'alerte à l'achat (`routes:buy-check`,
+marchandise mal vendue à l'étape suivante) et la question quand un amarrage ou un achat s'écarte de la route active
+(`routes:question`). Dans un autre mode (commerce de rares, minage…), s'écarter de la route active est voulu
+(`server/src/modules/routes/services/tracker.js`, `enModeCommerce`).
+
+### Catalogue des rares et alerte de stock
+
+La page du mode montre aussi le **catalogue des rares** : pour chaque marchandise rare, la station où elle s'achète,
+le système, le pad, la distance de la station à l'étoile, la distance depuis ta position, la quantité en stock, le
+prix d'achat et l'âge du relevé. Tri par distance, quantité, prix, nom ou relevé ; filtres de distance, de grand pad
+et « au seuil seulement ».
+
+**D'où viennent les données** (`server/src/modules/rares/catalogue.js`). De [Spansh](https://spansh.co.uk), lui-même
+alimenté par les marchés que les joueurs relèvent (réseau EDDN). Une requête par rare
+(`POST https://spansh.co.uk/api/stations/search`, sans clé), limitée aux stations : sans ça, les porte-vaisseaux qui
+revendent des rares passent devant la source. Le relevé complet (142 rares) prend environ une minute, les requêtes se
+suivent avec 0,3 s de pause. Il part **seulement à ta demande** (bouton), jamais deux fois en moins de 10 minutes, et
+n'envoie que le nom de la marchandise : ta position ne part pas, la distance est calculée dans l'app d'après les
+coordonnées du système source et celles de ton dernier saut. Le résultat est gardé dans `rares-catalogue.json`.
+
+**Limites, à dire telles quelles.** La quantité est ce qu'il restait au dernier passage d'un joueur, pas ce que la
+station te vendra (23 t de cigares affichées juste après un achat de 102 t). Une rare épuisée au moment du relevé ne
+sort pas de la recherche : sa dernière ligne connue est gardée, stock à 0. Le prix de vente n'existe nulle part : une
+station ne cote une rare que si on l'a en soute.
+
+**Alerte.** Un seuil de quantité (100 t par défaut, réglable) : les rares à ce seuil sont surlignées dans le tableau.
+Avec « Surveiller et m'alerter en jeu » (éteint par défaut), l'app refait le relevé toutes les 6 heures tant qu'elle
+tourne, et ouvre la fenêtre `/hud/rares-alerte` quand une rare vient d'atteindre le seuil (elle n'y était pas au
+relevé d'avant). La fenêtre se ferme seule au bout de 3 minutes, ou au ✕.
+
+Routes : `GET /api/modules/rares/catalogue`, `POST …/catalogue/actualiser`, `PUT …/catalogue/reglages`
+(`{ seuil, surveiller }`), `POST …/catalogue/alerte/fermer`. Diffusion : `rares:catalogue`.
+
+**Historique des stocks** (`server/src/modules/rares/historique.js`, fichier `rares-historique.json`). Spansh ne
+garde que le dernier relevé de chaque marché, alors que le stock d'une rare bouge beaucoup (16 t un jour, 400 t un
+autre). L'app note donc chaque valeur qu'elle voit : à chaque relevé du catalogue (heure du passage du joueur, stock,
+prix, état de la faction qui tient la station), une rare disparue du relevé (notée à 0), et chaque marché que tu
+ouvres en jeu à une station qui produit une rare (`Market.json` : la mesure la plus sûre). 400 points au plus par
+rare. Le tableau en tire « Plus haut vu » et le nombre de passages notés ;
+`GET /api/modules/rares/catalogue/historique?nom=<nom anglais>` rend tous les points. C'est la matière pour
+comprendre ce qui fait monter un stock ; aucune règle n'en est encore tirée.

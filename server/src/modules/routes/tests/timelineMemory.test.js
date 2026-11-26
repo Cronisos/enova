@@ -77,3 +77,24 @@ test('mérites de la chronologie : gain réel d’après le total du jeu, ligne 
   assert.equal(merits.reduce((a, b) => a + b, 0), 1773 + 30);
   assert.ok(ROUTE_EVENTS.includes('Powerplay'), 'le total de départ est lu');
 });
+
+test('alertes d’achat et questions : seulement en mode Commerce ; le suivi, lui, continue dans tous les modes', async () => {
+  const achat = { timestamp: '2026-11-23T16:33:57Z', event: 'MarketBuy', MarketID: 1, Type: 'kamitracigars', Count: 102, BuyPrice: 10116, TotalCost: 1031832 };
+  const essai = (overlay) => {
+    const journal = fauxJournal();
+    const tracker = new RouteTracker({ prisma: fausseBase, journal, game: { snapshot: () => ({}) }, broadcast: () => {}, overlay });
+    const appels = [];
+    tracker.checkBuy = async () => { appels.push('achat'); return null; };
+    tracker.askIfChanged = async () => { appels.push('question'); };
+    journal.emit('event', { ...achat });
+    journal.emit('event', { timestamp: '2026-11-23T16:40:00Z', event: 'Docked', StationName: 'Station Test', StarSystem: 'Système Test', MarketID: 2 });
+    return { appels, tracker };
+  };
+  assert.deepEqual(essai({ mode: () => 'routes' }).appels, ['achat', 'question', 'question']);
+  const rares = essai({ mode: () => 'rares' });
+  assert.deepEqual(rares.appels, [], 'commerce de rares : ni alerte ni question');
+  assert.ok(rares.tracker.timeline.length >= 1, 'la chronologie est tenue quand même');
+  assert.deepEqual(essai({ mode: () => null }).appels, [], 'aucun mode');
+  assert.deepEqual(essai(undefined).appels, ['achat', 'question', 'question'], 'sans overlay (serveur seul) : comme avant');
+  await new Promise((r) => setTimeout(r, 400)); // laisse finir les synchronisations programmées
+});

@@ -12,11 +12,15 @@ const ROUTE_SET = new Set(ROUTE_EVENTS);
 const SYNC_TRIGGERS = new Set(['MarketBuy', 'MarketSell', 'Docked', 'Undocked', 'FSDJump', 'Died', 'Resurrect', 'Location']);
 
 export class RouteTracker {
-  constructor({ prisma, journal, game, broadcast }) {
+  constructor({ prisma, journal, game, broadcast, overlay }) {
     this.prisma = prisma;
     this.journal = journal;
     this.game = game;
     this.broadcast = broadcast;
+    // Alertes d'achat et questions sur la route : seulement en mode Commerce. Dans un autre mode (commerce de rares,
+    // minage…), un achat qui s'écarte de la route active est voulu : on ne dérange pas. Le suivi des boucles, lui,
+    // continue (il se refait depuis le journal). Sans overlay (tests, serveur seul) : comme avant, toujours.
+    this.enModeCommerce = () => !overlay?.mode || overlay.mode() === 'routes';
     // Chronologie tenue au fil du journal (timeline.js) : les événements bruts ne sont pas gardés
     this.builder = new TimelineBuilder();
     this.timeline = this.builder.entries;
@@ -36,13 +40,13 @@ export class RouteTracker {
       if (!ROUTE_SET.has(ev.event)) return;
       this.builder.add(ev);
       this.timeline = this.builder.entries;
-      if (ev.event === 'MarketBuy') {
+      if (ev.event === 'MarketBuy' && this.enModeCommerce()) {
         // Vérification immédiate de l'achat (le Market.json de la station est déjà à jour)
         this.checkBuy(this.timeline[this.timeline.length - 1])
           .then((r) => r && this.broadcast('routes:buy-check', r))
           .catch((err) => console.error("Vérification de l'achat :", err.message));
       }
-      if (ev.event === 'Docked' || ev.event === 'MarketBuy') {
+      if ((ev.event === 'Docked' || ev.event === 'MarketBuy') && this.enModeCommerce()) {
         this.askIfChanged(this.timeline[this.timeline.length - 1]).catch((err) => console.error('Question :', err.message));
       }
       if (SYNC_TRIGGERS.has(ev.event)) this.scheduleSync(300);

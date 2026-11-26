@@ -18,6 +18,8 @@ import { AUTO_LABEL, shouldGuide } from './lastSpot.js';
 import { oreOf, nomMinerai, AUTRES_MINERAIS } from './ores.js';
 import { liveSnapshot, ORE_SYMBOLS, SystemMarkets } from './markets.js';
 import { MIN_DEMAND, OrePrices } from './topOres.js';
+import { GuideObservations } from './guide.js';
+import { lieuxParMinerai } from './chercher.js';
 import { mountDrills } from './drillsApi.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -168,6 +170,7 @@ export default {
     let last = 0;
     let pending = null;
     let mining = new MiningState();
+    let guide = new GuideObservations(); // ce que tes journaux disent des ressources du Rhino (guide.js)
     let siteEcrit = 0; // heure de la cible écrite dans SITE_FILE
     const interesting = new Set([...MINING_EVENTS, ...ACTIVITY_EVENTS]);
     // Tes déplacements et changements d'écran (Status.json) comptent comme des actions : pas de pause en roulant
@@ -320,12 +323,14 @@ export default {
     journal.addInterest([...MINING_EVENTS, ...ACTIVITY_EVENTS]);
     journal.on('ready', ({ history }) => {
       mining = new MiningState();
+      guide = new GuideObservations();
       events = [];
       raffines.clear();
       depuisTri = 0;
       for (const ev of history) {
         if (!interesting.has(ev.event)) continue;
         mining.apply(ev);
+        guide.apply(ev);
         retenir(ev);
       }
       mining.target(status?.Destination, status?.BodyName);
@@ -424,6 +429,7 @@ export default {
       }
       const before = mining.site;
       mining.apply(ev);
+      guide.apply(ev);
       if (mining.site !== before) broadcast('waypoints:survey', { system: game.snapshot().system }); // EEP le plus proche connu
       if (session) {
         session.live.apply(ev);
@@ -809,6 +815,9 @@ export default {
     }
     // Minerais du Rhino à chercher en priorité : meilleure vente du moment (demande ≥ 1 000 t), les 10 premiers
     const orePrices = new OrePrices(ORE_SYMBOLS);
+    // Guide des ressources : tes observations (type de monde et prix de vente par ressource), lues dans tes journaux.
+    // Rien ne sort du PC, rien n'est demandé à un site.
+    router.get('/guide', (req, res) => res.json({ ressources: guide.summary(), at: new Date().toISOString() }));
     router.get('/sweep/top-ores', wrap(async (req, res) => {
       const list = await orePrices.ranking();
       res.json({ minDemand: MIN_DEMAND, ores: list.slice(0, 10), at: new Date().toISOString() });
@@ -1252,6 +1261,29 @@ export default {
         return { system, systemAddress: addr, ...s.totals, ores: [...new Set(s.planets.flatMap((p) => p.ores.filter((o) => o.good.length).map((o) => o.ore)))] };
       });
       res.json(list.sort((a, b) => b.good - a.good || a.system.localeCompare(b.system, 'fr')));
+    }));
+
+    /**
+     * Chercher un minerai : les endroits connus où en trouver, tous systèmes confondus (chercher.js). Lecture de la base
+     * seulement : aucun site n'est interrogé.
+     */
+    router.get('/chercher', wrap(async (req, res) => {
+      const [sites, bodies, waypoints] = await Promise.all([
+        prisma.miningSite.findMany(),
+        prisma.miningBody.findMany(),
+        prisma.waypoint.findMany({ where: { category: 'mining' } }),
+      ]);
+      const vus = waypoints.map(view);
+      const noms = [...new Set([...sites, ...bodies, ...waypoints].map((x) => x.system).filter(Boolean))];
+      const releves = noms.map((system) => {
+        const de = (rows) => rows.filter((r) => r.system === system);
+        const adresse = [...de(sites), ...de(bodies), ...de(waypoints)].map((r) => systemAddressOf(r.systemAddress)).find(Boolean) || null;
+        return buildSurvey({ system, systemAddress: adresse, classes: mining.classes, sites: de(sites), bodies: de(bodies), waypoints: de(vus) });
+      });
+      // Nom tapé sur un repère → minerai connu (fautes comprises), sinon rien : oreOf, comme pour les couleurs de la carte
+      const autres = [...AUTRES_MINERAIS, ...appris()];
+      const minerai = (nom) => oreOf({ label: nom, notes: '' }, COMMON_ORES, autres);
+      res.json({ minerais: lieuxParMinerai(releves, new Map(vus.map((w) => [w.id, w])), minerai), at: new Date().toISOString() });
     }));
 
     /** Un emplacement : « rien d'intéressant », note de 1 à 10, minerais, notes. Rien de noté : la ligne disparaît. */

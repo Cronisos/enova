@@ -83,7 +83,7 @@ export default function ReglageRaccourcis() {
       <table className="table compact">
         <tbody>
           {actions.map((a, k) => (
-            <tr key={a.id}>
+            <tr key={a.id} data-tuto={`raccourci-${a.id}`}>
               <td><b>{a.titre}</b><div className="muted small">{a.description}</div></td>
               <td className={enDouble.includes(a.touche) ? 'warn' : undefined} style={{ whiteSpace: 'nowrap' }}>
                 <Saisie touche={a.touche} onChoix={(t) => setActions(actions.map((x, j) => (j === k ? { ...x, touche: t } : x)))} />

@@ -221,6 +221,8 @@ test('repères partageables : trois types, ni « pas rentable », ni suivi perso
   assert.deepEqual(objets.map((o) => o.kind + ':' + o.ref), ['repere-rhino:1', 'repere-minage:2', 'repere:3']);
   assert.deepEqual(objets[0].data, { label: 'Filon Rhino', category: 'mining', drills: 4, system: 'Système Test', body: 'Système Test 2 a', latitude: 1, longitude: 2, vehicle: 'srv' });
   assert.equal(genreRepere({ category: 'mining', vehicle: 'ship', siteNumber: 3 }), 'repere-rhino');
+  assert.equal(genreRepere({ category: 'guardian', vehicle: 'srv' }), 'repere-gardien');
+  assert.equal(reperesPartageables([{ id: 9, label: 'Structure active', category: 'guardian', system: 'Système Test' }])[0].kind, 'repere-gardien');
   assert.deepEqual(reperesPartageables('non'), []);
 });
 

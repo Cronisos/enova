@@ -110,7 +110,7 @@ function flux() {
 
 test('lecture : rôles possibles (modes + Polyvalent), maximum, rôles des vaisseaux', async () => {
   const r = await get('/api/ships/roles');
-  assert.deepEqual(r.roles.map((x) => x.id), ['routes', 'waypoints', 'shipmining', 'combat', 'groundcombat', 'rescue', 'materials', 'colonisation', 'polyvalent']);
+  assert.deepEqual(r.roles.map((x) => x.id), ['routes', 'rares', 'waypoints', 'shipmining', 'combat', 'groundcombat', 'rescue', 'materials', 'powerdelivery', 'gardiens', 'colonisation', 'polyvalent']);
   assert.equal(r.maxSecondary, 3);
   assert.deepEqual(r.ships, {});
   assert.deepEqual(await get('/api/ships/current'), { shipId: null, type: null, model: null, name: null, nickname: null, title: null, role: null });

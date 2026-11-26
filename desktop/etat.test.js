@@ -99,7 +99,9 @@ test('MAR : pages ouvrables, place au coin haut gauche', () => {
   const zone = { x: 0, y: 0, width: 3440, height: 1400 };
   assert.deepEqual(placeBarre(zone, { width: 600.4, height: 40 }), { x: 8, y: 8, width: 600, height: 40 });
   assert.deepEqual(placeBarre(zone, { width: 99999, height: -5 }), { x: 8, y: 8, width: 1400, height: 30 });
-  assert.deepEqual(placeBarre({ x: 1920, y: 40, width: 1920, height: 1040 }, { width: 'x', height: 500 }), { x: 1928, y: 48, width: 120, height: 500 });
+  assert.deepEqual(placeBarre({ x: 1920, y: 40, width: 1920, height: 1040 }, { width: 'x', height: 500 }), { x: 1928, y: 48, width: 30, height: 500 });
+  // Tout caché : le MAR réduit à son logo garde sa largeur, sans bande invisible à côté
+  assert.deepEqual(placeBarre(zone, { width: 40, height: 40 }), { x: 8, y: 8, width: 40, height: 40 });
 });
 
 test('MAR : coin et décalage réglables, toujours dans l’écran', () => {

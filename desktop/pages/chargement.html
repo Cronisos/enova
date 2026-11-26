@@ -5,20 +5,37 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; img-src 'self'">
 <title>Enova</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #0a0c0f; color: #dfe4ea; font: 14px 'Segoe UI', system-ui, sans-serif; }
-  .barre { height: 38px; display: flex; align-items: center; justify-content: space-between; padding: 0 0 0 14px; -webkit-app-region: drag; border-bottom: 1px solid #242b34; }
+  html, body { margin: 0; height: 100%; color: #dfe4ea; font: 14px 'Segoe UI', system-ui, sans-serif; }
+  /* Fond de l'image d'aperçu du dépôt (marque/enova-apercu-1280x640.png) : nuit bleue, lueur orange en haut à droite,
+     violette en bas, étoiles (chargement.js) et cadre fin aux coins coupés */
+  body {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(ellipse 55% 88% at 50% 52%, rgba(46, 110, 220, .34), transparent 70%),
+      radial-gradient(ellipse 55% 66% at 92% 8%, rgba(255, 150, 40, .20), transparent 70%),
+      radial-gradient(ellipse 47% 60% at 78% 104%, rgba(60, 40, 140, .38), transparent 70%),
+      #05070c;
+  }
+  #ciel { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .cadre { position: absolute; inset: 56px 18px 18px; pointer-events: none; border: 1.5px solid rgba(255, 190, 90, .34); clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 26px 100%, 0 calc(100% - 26px)); }
+  .barre, main { position: relative; }
+  .barre { height: 38px; display: flex; align-items: center; justify-content: space-between; padding: 0 0 0 14px; -webkit-app-region: drag; border-bottom: 1px solid #242b34; background: rgba(5, 7, 12, .7); }
   .barre b { color: #ff9a3c; letter-spacing: .14em; text-transform: uppercase; font-size: 13px; }
   .barre button { -webkit-app-region: no-drag; background: none; border: 0; color: #8a94a0; width: 46px; height: 38px; font-size: 14px; cursor: pointer; }
   .barre button:hover { background: #1b2129; color: #fff; }
   .barre button.x:hover { background: #c42b1c; }
   main { height: calc(100% - 39px); display: grid; place-items: center; text-align: center; }
-  .marque { color: #ff9a3c; font-size: 34px; }
-  p { color: #8a94a0; }
+  /* Logo d'Enova, en grand : plus de la moitié de la hauteur de la fenêtre (760 px au plus) ; une lueur bleue qui respire trois fois */
+  .marque { display: block; margin: 0 auto 14px; width: min(58vh, 62vw, 760px); height: auto; filter: drop-shadow(0 0 36px rgba(60, 140, 255, .5)); animation: lueur 2.6s ease-in-out 3 alternate; }
+  @keyframes lueur { from { filter: drop-shadow(0 0 22px rgba(60, 140, 255, .32)); } to { filter: drop-shadow(0 0 52px rgba(255, 170, 60, .5)); } }
+  p { color: #a8b2c0; font-size: 15px; letter-spacing: .04em; }
 </style>
 </head>
 <body>
+<canvas id="ciel"></canvas>
+<div class="cadre"></div>
 <div class="barre"><b>◆ Enova</b><span><button type="button" id="r" title="Réduire">—</button><button type="button" id="x" class="x" title="Fermer (l'app reste dans la zone de notification)">✕</button></span></div>
-<main><div><img class="marque" src="enova.png" alt="" width="256" height="256"><p id="etape">Démarrage…</p></div></main>
+<main><div><img class="marque" src="enova.png" alt="" width="760" height="760"><p id="etape">Démarrage…</p></div></main>
 <script src="chargement.js"></script>
 </body>
 </html>

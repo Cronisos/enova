@@ -20,7 +20,7 @@ export const SCO_NEW_GENERATION = new Set(SCO_NEW_GENERATION_LIST);
 
 // --- Réglages de l'app (pas des règles du jeu) -------------------------------------------------------------------
 
-export const SCO_READY_SIGNAL_MS = 4_000; // le signal « SCO prêt » reste affiché 4 s, puis la fenêtre se ferme
+export const SCO_READY_SIGNAL_MS = 1_000; // le signal « SCO prêt » reste affiché 1 s, puis la fenêtre se ferme (4 s jusqu'au 19 nov. 2026 : trop long)
 export const SCO_MIN_GAP_MS = 2_000; // écart plus court : bit qui clignote, pas une vraie réactivation
 export const SCO_MAX_GAP_MS = 60_000; // écart plus long : le joueur a attendu, la mesure n'apprend rien
 export const SCO_KEEP = 20; // écarts gardés par vaisseau : une mesure fausse finit par sortir

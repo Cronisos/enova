@@ -26,7 +26,7 @@ test('nombres : base 64 à largeur fixe, aller-retour', () => {
 });
 
 test('noms : lettres et chiffres tels quels, ponctuation et accents codés, le reste retiré', () => {
-  assert.equal(encodeText('Panther commerce'), 'Panther_0commerce');
+  assert.equal(encodeText('Panther marchand'), 'Panther_0marchand');
   assert.equal(encodeText('é'), '-1g');
   assert.equal(decodeText(encodeText('a b-c_d.e/f ~`{}|\\"\'')), 'a b-c_d.e/f ~`{}|\\"\'');
   const last = String.fromCharCode(0x107e);

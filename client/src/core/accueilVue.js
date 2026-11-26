@@ -52,6 +52,24 @@ export function chiffresSession(mode, d) {
         { label: 'Matériaux', valeur: int(d.total) },
         ...(Array.isArray(d.byGrade) ? [{ label: 'G4 + G5', valeur: int((d.byGrade[3] || 0) + (d.byGrade[4] || 0)) }] : []),
       ];
+    case 'rares':
+      return [
+        { label: 'Mérites', valeur: int(d.merits) },
+        { label: 'Vendues', valeur: `${int(d.sold)} t` },
+        { label: 'Bénéfice', valeur: `${compact(d.profit)} cr` },
+      ];
+    case 'gardiens':
+      return [
+        { label: 'Plans', valeur: `+${int(d.plans)}` },
+        { label: 'Matériaux', valeur: int(d.total) },
+        { label: 'Données', valeur: int(d.donnees) },
+      ];
+    case 'powerdelivery':
+      return [
+        { label: 'En soute', valeur: `${int(d.hold?.count ?? 0)} t` },
+        { label: 'Livrées', valeur: `${int(d.delivered)} t` },
+        { label: 'Mérites', valeur: int(d.merits) },
+      ];
     case 'shipmining':
       return [
         { label: 'Prospectés', valeur: int(d.prospected) },

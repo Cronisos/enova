@@ -26,12 +26,12 @@ test('déclaration : identifiants uniques, fenêtres valides, HUD en premier, to
     assert.ok(['activé', 'activée', 'activés', 'activées'].includes(m.activated), `${m.id} : accord de « activé » déclaré`);
   }
   assert.deepEqual(Object.fromEntries(MODES.map((m) => [m.id, m.activated])), {
-    routes: 'activé', waypoints: 'activé', shipmining: 'activé', combat: 'activé', groundcombat: 'activé', rescue: 'activé', materials: 'activés', colonisation: 'activée',
+    routes: 'activé', rares: 'activé', waypoints: 'activé', shipmining: 'activé', combat: 'activé', groundcombat: 'activé', rescue: 'activé', materials: 'activés', powerdelivery: 'activée', gardiens: 'activés', colonisation: 'activée',
   });
   assert.ok(Object.isFrozen(MODES) && Object.isFrozen(ROLES));
   assert.deepEqual(ROLES.map((r) => r.id), [...ids, 'polyvalent'], 'rôles = modes + Polyvalent, sans rien écrire en plus');
   assert.deepEqual(windowsOf('routes'), [], 'Commerce : pas de fenêtre');
-  assert.deepEqual(windowsOf('waypoints'), ['waypoints', 'waypoints-list', 'waypoints-guide', 'capture', 'waypoints-sweep', 'waypoints-sweep-top', 'waypoints-sweep-pose']);
+  assert.deepEqual(windowsOf('waypoints'), ['waypoints', 'waypoints-list', 'waypoints-guide', 'waypoints-sweep', 'waypoints-sweep-top', 'waypoints-sweep-pose']);
   const copie = windowsOf('combat');
   copie.push('x');
   assert.deepEqual(windowsOf('combat'), ['combat'], 'windowsOf rend une copie');
@@ -70,7 +70,7 @@ test('rôle refusé, avec la raison en français', () => {
     [[], /Rôle illisible/],
     ['waypoints', /Rôle illisible/],
     [{ primary: 4 }, /Rôle principal illisible/],
-    [{ primary: 'minage' }, /Rôle principal inconnu : « minage »\. Rôles possibles : routes, waypoints/],
+    [{ primary: 'minage' }, /Rôle principal inconnu : « minage »\. Rôles possibles : routes, rares, waypoints/],
     [{ primary: '__proto__' }, /Rôle principal inconnu/],
     [{ primary: 'constructor' }, /Rôle principal inconnu/],
     [{ primary: null, secondary: 'combat' }, /Rôles secondaires illisibles/],

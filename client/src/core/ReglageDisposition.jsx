@@ -1,5 +1,5 @@
 // Paramètres → disposer les fenêtres en jeu : toutes les fenêtres de l'overlay s'ouvrent d'un coup en mode déplacement,
-// même celles qui ne restent que quelques secondes (FSD prêt…) ou qui n'apparaissent qu'à leur moment (saut du porteur,
+// même celles qui ne restent que quelques secondes (SCO prêt…) ou qui n'apparaissent qu'à leur moment (saut du porteur,
 // itinéraire…). On les glisse où on veut, puis « Terminé » enregistre les places et remet l'overlay comme avant.
 
 import { useEffect, useState } from 'react';
@@ -32,7 +32,7 @@ export default function ReglageDisposition() {
       <h2>Disposer les fenêtres en jeu</h2>
       <p className="small muted">
         Ouvre d’un coup les {fenetres.length} fenêtres de l’overlay, chacune dans un cadre à son nom, même celles qui ne
-        s’affichent que quelques secondes (FSD prêt) ou à leur moment (saut du porteur, itinéraire, vente…). Glisse-les
+        s’affichent que quelques secondes (SCO prêt) ou à leur moment (saut du porteur, itinéraire, vente…). Glisse-les
         où tu veux sur l’écran du jeu (les fenêtres libres gardent leurs boutons de taille), puis « Terminé » : chaque
         place est enregistrée et l’overlay revient comme avant.
       </p>

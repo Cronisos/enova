@@ -710,6 +710,104 @@ export const DONNEES = {
   "chronoFrom": null,
   "chronoPausedMs": 0
  },
+ "/modules/rares/session": {
+  "startedAt": "2026-11-16T18:24:34Z",
+  "bought": 204,
+  "sold": 102,
+  "cost": 2063664,
+  "revenue": 2505426,
+  "profit": 1473594,
+  "merits": 1540,
+  "deaths": 0,
+  "hold": { "count": 102, "items": [{ "label": "Cigares de Kamitra", "count": 102 }] },
+  "types": [{ "label": "Cigares de Kamitra", "bought": 204, "sold": 102, "profit": 1473594, "merits": 1540 }],
+  "recent": [
+   { "at": "2026-11-16T18:41:10Z", "kind": "Acheté", "label": "Cigares de Kamitra", "count": 102, "credits": -1031832, "merits": 0 },
+   { "at": "2026-11-16T18:36:02Z", "kind": "Vendu", "label": "Cigares de Kamitra", "count": 102, "credits": 1473594, "merits": 1540 }
+  ],
+  "pausedMs": 0,
+  "pausedSince": "2026-11-16T18:41:30.000Z",
+  "pauseReason": "docked",
+  "chronoFrom": null,
+  "chronoPausedMs": 0
+ },
+ "/modules/gardiens/site": {
+  "site": { "nom": "Structure des Gardiens", "forme": "ancient_small_002", "corps": "Système Test 2 a", "latitude": 19.8236, "longitude": -82.4609, "plan": null, "at": "2026-11-16T18:30:00Z" },
+  "guide": null,
+  "points": [
+   { "id": 1, "type": "pylone", "n": 1, "latitude": 19.8241, "longitude": -82.4602 },
+   { "id": 2, "type": "pylone", "n": 2, "latitude": 19.8229, "longitude": -82.4621 },
+   { "id": 3, "type": "machine", "n": null, "latitude": 19.8247, "longitude": -82.4611 }
+  ],
+  "position": { "latitude": 19.8234, "longitude": -82.4609, "heading": 40, "planetRadius": 1500000, "body": "Système Test 2 a" },
+  "types": { "pylone": "Pylône", "machine": "Machine", "relique": "Relique" }
+ },
+ "/modules/gardiens/session": {
+  "startedAt": "2026-11-16T18:24:34Z",
+  "total": 47,
+  "plans": 2,
+  "donnees": 9,
+  "collectes": [
+   { "cle": "guardian_powercell", "count": 21 },
+   { "cle": "guardian_techcomponent", "count": 15 },
+   { "cle": "ancienttechnologicaldata", "count": 9 },
+   { "cle": "guardian_moduleblueprint", "count": 2 }
+  ],
+  "recent": [
+   { "at": "2026-11-16T18:41:10Z", "cle": "guardian_moduleblueprint", "count": 1 }
+  ],
+  "pausedMs": 0,
+  "pausedSince": null,
+  "pauseReason": null,
+  "chronoFrom": null,
+  "chronoPausedMs": 0
+ },
+ "/modules/powerdelivery/session": {
+  "startedAt": "2026-11-16T18:24:34Z",
+  "collected": 268,
+  "delivered": 268,
+  "merits": 1608,
+  "deaths": 0,
+  "hold": {
+   "count": 120,
+   "items": [
+    {
+     "label": "Dossiers de presse",
+     "count": 120
+    }
+   ]
+  },
+  "types": [
+   {
+    "label": "Dossiers de presse",
+    "collected": 388,
+    "delivered": 268,
+    "merits": 1608
+   }
+  ],
+  "lastActionAt": "2026-11-16T18:41:10Z",
+  "recent": [
+   {
+    "at": "2026-11-16T18:41:10Z",
+    "kind": "Chargé",
+    "label": "Dossiers de presse",
+    "count": 120,
+    "merits": 0
+   },
+   {
+    "at": "2026-11-16T18:36:02Z",
+    "kind": "Livré",
+    "label": "Dossiers de presse",
+    "count": 268,
+    "merits": 1608
+   }
+  ],
+  "pausedMs": 0,
+  "pausedSince": "2026-11-16T18:41:30.000Z",
+  "pauseReason": "docked",
+  "chronoFrom": null,
+  "chronoPausedMs": 0
+ },
  "/modules/rescue/session": {
   "startedAt": "2026-11-16T18:24:34Z",
   "collected": 17,

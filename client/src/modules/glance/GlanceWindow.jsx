@@ -215,11 +215,11 @@ export default function GlanceWindow() {
 
   return (
     // switchNotice : l'avis d'une bascule vers un mode sans fenêtre (Commerce) n'a que cette fenêtre-ci en jeu
-    <PanelOverlay title="👁 Coup d'œil" footer={footer} autoHeight switchNotice>
+    <PanelOverlay title="👁 Coup d'œil" aside={<ModeJeu rebuy={data.rebuy} />} footer={footer} autoHeight switchNotice>
       <style>{CSS}</style>
       <div className="gw">
         <div className="hud-cell hud-cell-cv" data-tuto="fej-credits" style={{ '--c': 'var(--accent)' }}>
-          <div className="hud-label">Crédits <ModeJeu rebuy={data.rebuy} /></div>
+          <div className="hud-label">Crédits</div>
           <span className="hud-value">{compact(data.credits.balance)}</span>
           <span className="hud-sub">{cr(data.credits.balance)}</span>
         </div>

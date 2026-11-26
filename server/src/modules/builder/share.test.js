@@ -25,8 +25,8 @@ function sansDanger(text) {
 }
 
 test('build ordinaire : texte inchangé', () => {
-  assert.equal(shareText({ name: 'Panther commerce' }, 'Panther Clipper Mk II', STATS, LIEN),
-    `**Panther commerce**\nPanther Clipper Mk II · 512 MJ de boucliers · 87,3 DPS · 31,46 al de saut\n[EDSY](${LIEN})`);
+  assert.equal(shareText({ name: 'Panther marchand' }, 'Panther Clipper Mk II', STATS, LIEN),
+    `**Panther marchand**\nPanther Clipper Mk II · 512 MJ de boucliers · 87,3 DPS · 31,46 al de saut\n[EDSY](${LIEN})`);
   assert.match(shareText({ name: '' }, 'Cobra Mk III', { ...STATS, dps: 0 }, LIEN), /^\*\*Cobra Mk III\*\*\nCobra Mk III · 512 MJ de boucliers · 31,46 al/);
 });
 

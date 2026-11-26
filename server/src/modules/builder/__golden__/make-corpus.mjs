@@ -460,7 +460,7 @@ const links = [
 const hash = {
   encode: [[0, 1], [5, 1], [63, 1], [64, 2], [0x444, 2], [4000, 2], [4095, 2], [5000, 2], [199900, 3], [199907, 3], [262143, 3], [12, 3]],
   decode: ['0', 'z', '-', '_', '10', '_-', 'Kz0', '!!', 'é', ''],
-  texts: ['Panther commerce', 'Anaconda test é', 'Cutter « full déf »', 'a b-c_d.e/f', 'Ünïcødé ŒŸ ∑', 'A ⇄ B 🚀', '~`{}|\\"\'', '', 'ÿĀ'],
+  texts: ['Panther marchand', 'Anaconda test é', 'Cutter « full déf »', 'a b-c_d.e/f', 'Ünïcødé ŒŸ ∑', 'A ⇄ B 🚀', '~`{}|\\"\'', '', 'ÿĀ'],
   rawT: ['_0', '_W', '-00', '-0-', '-zz', 'ab_', '-0', '_'],
   names: ['A ⇄ B', 'x ↔ y', 'emoji 🚀 ok', 'Été', '', null, 'ሀ'],
   extract: [

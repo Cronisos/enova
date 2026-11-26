@@ -28,12 +28,15 @@ const mode = (id, label, icon, windows, activated) => {
  */
 export const MODES = Object.freeze([
   mode('routes', 'Commerce', '⇄', [], 'activé'),
-  mode('waypoints', 'Minage Rhino', '⛏', ['waypoints', 'waypoints-list', 'waypoints-guide', 'capture', 'waypoints-sweep', 'waypoints-sweep-top', 'waypoints-sweep-pose'], 'activé'),
+  mode('rares', 'Commerce de rares', '◆', ['rares'], 'activé'),
+  mode('waypoints', 'Minage Rhino', '⛏', ['waypoints', 'waypoints-list', 'waypoints-guide', 'waypoints-sweep', 'waypoints-sweep-top', 'waypoints-sweep-pose'], 'activé'),
   mode('shipmining', 'Minage vaisseau', '☄', ['shipmining'], 'activé'),
   mode('combat', 'Combat', '⚔', ['combat'], 'activé'),
   mode('groundcombat', 'Combat au sol', '🪖', ['groundcombat'], 'activé'),
   mode('rescue', 'Sauvetage', '✚', ['rescue'], 'activé'),
   mode('materials', 'Matériaux', '◈', ['materials'], 'activés'),
+  mode('powerdelivery', 'Livraison Powerplay', '📦', ['powerdelivery'], 'activée'),
+  mode('gardiens', 'Gardiens', '◬', ['gardiens', 'gardiens-site'], 'activés'),
   mode('colonisation', 'Colonisation', '🏗', ['colonisation', 'colonisation-list'], 'activée'),
 ]);
 

@@ -236,8 +236,8 @@
  "hash": {
   "encode": ["0","5","-","10","H4","_W","--","1E8","mpS","mpZ","---","00C"],
   "decode": [0,61,63,62,64,4031,85824,0,0,0],
-  "encodeT": ["Panther_0commerce","Anaconda_0test_0-1g","Cutter_0-0i_0full_0d-1gf_0-0y","a_0b_Dc_Rd_Ee_Ff","-1Tn-1mc-1vd-1g_0-3J-3v_0","A_0_0B_0","_W_S_T_V_U_O_2_7","","-20-21"],
-  "decodeT": ["Panther commerce","Anaconda test é","Cutter « full déf »","a b-c_d.e/f","Ünïcødé ŒŸ ","A  B ","~`{}|\\\"'","","ÿĀ"],
+  "encodeT": ["Panther_0marchand","Anaconda_0test_0-1g","Cutter_0-0i_0full_0d-1gf_0-0y","a_0b_Dc_Rd_Ee_Ff","-1Tn-1mc-1vd-1g_0-3J-3v_0","A_0_0B_0","_W_S_T_V_U_O_2_7","","-20-21"],
+  "decodeT": ["Panther marchand","Anaconda test é","Cutter « full déf »","a b-c_d.e/f","Ünïcødé ŒŸ ","A  B ","~`{}|\\\"'","","ÿĀ"],
   "decodeRawT": [" ","~","","¾","࿼","ab ",""," "],
   "safeName": ["A <-> B","x <-> y","emoji  ok","Été","","",""],
   "extract": ["Kz00000O6C0S00,,,9onG05I_W0,,,","abc,def","xyz","K1","%E0%A4%A",null,null,null]

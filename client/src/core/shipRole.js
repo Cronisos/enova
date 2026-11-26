@@ -12,8 +12,8 @@ export const draftOf = (role) => ({ primary: role?.primary ?? null, secondary: [
 
 /** Couleur de chaque rôle, la même partout (tags des cartes et des fiches de vaisseau). */
 export const COULEURS_ROLE = Object.freeze({
-  routes: '#5fd38d', waypoints: '#e3b341', shipmining: 'var(--accent)', combat: '#ff6b6b', rescue: '#6fd3ff',
-  materials: '#b48cff', colonisation: '#4fd1c5', polyvalent: '#c8ced6',
+  routes: '#5fd38d', rares: '#ff9ed8', waypoints: '#e3b341', shipmining: 'var(--accent)', combat: '#ff6b6b', rescue: '#6fd3ff',
+  materials: '#b48cff', colonisation: '#4fd1c5', powerdelivery: '#ffd24a', gardiens: '#4fd8e6', polyvalent: '#c8ced6',
 });
 
 /** Tags d'un rôle : le principal d'abord (plein), puis les secondaires (contour) ; [] sans rôle. */

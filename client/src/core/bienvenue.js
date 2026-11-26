@@ -1,15 +1,24 @@
-// Premiers pas (carte en haut de l'accueil) : les trois choses à faire quand on ouvre l'app pour la première fois,
-// cochées d'après l'état réel de l'app. Sans React : testé seul.
+// Premiers pas (carte en haut de l'accueil) : les choses à faire quand on ouvre l'app pour la première fois, cochées
+// d'après l'état réel de l'app. Sans React : testé seul.
+
+import { ecrire } from './raccourcisVue.js';
 
 export const ID_BIENVENUE = 'bienvenue';
+// Étape « Ta touche pour la souris » : cochée quand le joueur dit la connaître, ou quand il a suivi le tutoriel du même
+// identifiant dans Paramètres (tutoriel/parcours.js), où mène son bouton (retenu avec les tutoriels vus). Sans
+// elle, impossible de cliquer ou de déplacer une fenêtre en jeu : c'est la première chose à savoir (l’auteur, 19 nov. 2026)
+export const ID_SOURIS = 'touche-souris';
 
 /**
  * Les étapes, dans l'ordre : [{ id, titre, fait, texte, lien, bouton }].
  *   - journal : l'app a-t-elle trouvé les journaux du jeu, et le jeu a-t-il déjà tourné ? ({ ready, file, error })
  *   - escadron : état du capteur ({ hasToken, enabled }), ou null si le module Escadron n'est pas dans cette version
  *   - mode : mode de jeu choisi (identifiant), ou null
+ *   - souris : { touche, vue } : le raccourci du mode souris (« Alt+Shift+K », '' s'il n'y en a pas, undefined s'il
+ *     n'est pas encore lu), et si le joueur a dit le connaître
+ * Une étape peut avoir `valider` (identifiant à noter comme vu) et `boutonValider` : un second bouton, « J'ai compris ».
  */
-export function etapesBienvenue({ journal, escadron, mode }) {
+export function etapesBienvenue({ journal, escadron, mode, souris }) {
   const jeuVu = Boolean(journal?.ready && journal?.file);
   const etapes = [{
     id: 'jeu',
@@ -23,6 +32,23 @@ export function etapesBienvenue({ journal, escadron, mode }) {
     lien: jeuVu ? null : '/parametres',
     bouton: 'Ouvrir Paramètres',
   }];
+  const touche = souris?.touche;
+  const sansTouche = touche === '';
+  const sourisVue = Boolean(souris?.vue) && !sansTouche;
+  etapes.push({
+    id: 'souris',
+    titre: 'Ta touche pour la souris',
+    fait: sourisVue,
+    texte: sansTouche
+      ? 'Aucune touche n’est réglée pour la souris : sans elle, tu ne peux ni cliquer ni déplacer une fenêtre d’Enova pendant que tu joues. Choisis-en une dans Paramètres, section Raccourcis.'
+      : sourisVue
+        ? `${ecrire(touche || 'Alt+Shift+K')} te rend la souris en jeu, et la rend au jeu quand tu le refais.`
+        : `Indispensable. En jeu, la souris appartient au jeu : ${ecrire(touche || 'Alt+Shift+K')} te la rend pour cliquer dans les fenêtres d’Enova et les déplacer ; refais-le pour la rendre au jeu. Si cette combinaison te gêne, change-la dans Paramètres, section Raccourcis.`,
+    lien: sourisVue ? null : '/parametres',
+    bouton: sansTouche ? 'Choisir une touche' : 'Me montrer où la régler',
+    valider: sourisVue || sansTouche ? null : ID_SOURIS,
+    boutonValider: 'J’ai compris',
+  });
   if (escadron) {
     const inscrit = Boolean(escadron.hasToken);
     const envoi = inscrit && Boolean(escadron.enabled);

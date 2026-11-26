@@ -715,7 +715,17 @@ function restaurerDetachees() {
  */
 /** Place le MAR selon son réglage et la taille de ce qu'il montre. */
 function placerMar() {
-  if (barre && !barre.isDestroyed()) barre.setBounds(placeBarre(zoneMar(), tailleMar, mar));
+  if (!barre || barre.isDestroyed()) return;
+  const p = placeBarre(zoneMar(), tailleMar, mar);
+  barre.setBounds(p);
+  // Si Windows garde la fenêtre plus grande que demandé, seule la partie dessinée prend les clics : le reste les
+  // laisse au jeu (sinon une bande invisible à côté du logo, tout caché)
+  try {
+    const reel = barre.getBounds();
+    barre.setShape([{ x: 0, y: 0, width: Math.min(reel.width, p.width), height: Math.min(reel.height, p.height) }]);
+  } catch {
+    // pas de découpe sur ce système : la fenêtre garde sa taille
+  }
 }
 
 let ecransSuivis = false;

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PanelOverlay, useHiddenWindow } from '../../core/hud.jsx';
 import { useEvent } from '../../core/stream.js';
 import { meters, wpApi } from './api.js';
-import { LAST_SPOT, ORE_COLORS, UNKNOWN_ORE } from './oreColors.js';
+import { LAST_SPOT, MINERAIS_COLORES, couleurMinerai } from './oreColors.js';
 import CarteEEP from './CarteEEP.jsx';
 import NomSysteme from '../../core/NomSysteme.jsx';
 import { PoseForm, POSE_CSS } from './SweepPose.jsx';
@@ -94,7 +94,7 @@ function MarketBubble({ ore, markets }) {
   if (!markets) vide = 'Prix en cours de chargement…';
   else if (!list.length) vide = !ardentAsked(markets) ? 'Prix d’Ardent coupés (Mes repères › recherches automatiques).' : markets.error ? 'Prix injoignables pour l’instant.' : 'Aucune station du système ne l’achète.';
   return (
-    <div className="sw-bubble" style={{ '--c': ORE_COLORS[ore] || UNKNOWN_ORE }}>
+    <div className="sw-bubble" style={{ '--c': couleurMinerai(ore) }}>
       <h4>{ore} {markets?.system && <small>· prix dans <em><NomSysteme nom={markets.system} /></em></small>}</h4>
       {vide && <div className="sw-row is-none"><span>{vide}</span></div>}
       {montre.map((x) => (
@@ -111,14 +111,14 @@ function MarketBubble({ ore, markets }) {
 
 /** Les minerais des repères de la carte, du plus cher au moins cher, avec leur couleur. */
 function Legend({ marks, pick }) {
-  const ores = Object.keys(ORE_COLORS).filter((o) => marks?.some((m) => !m.auto && m.ore === o));
+  const ores = MINERAIS_COLORES.filter((o) => marks?.some((m) => !m.auto && m.ore === o));
   const last = marks?.some((m) => m.auto);
   if (!ores.length && !last) return null;
   return (
     <div className="sw-legend">
       {ores.map((o) => (
         <span key={o} className="has-price" onMouseEnter={() => pick(o)} onMouseLeave={() => pick(null)}>
-          <i style={{ background: ORE_COLORS[o] }} />{o}
+          <i style={{ background: couleurMinerai(o) }} />{o}
         </span>
       ))}
       {last && <span><i style={{ background: LAST_SPOT }} />Dernier minage</span>}

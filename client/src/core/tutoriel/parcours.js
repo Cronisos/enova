@@ -17,6 +17,53 @@ import { PARCOURS_FENETRES_AUTO } from './parcours/fenetres-auto.js';
 
 /** Le cadre de l'app, les repères et l'escadron ; les autres rubriques ont chacune leur fichier (parcours/). */
 const PARCOURS_BASE = [
+  // La touche qui rend la souris en jeu : le tout premier tutoriel, parce que sans elle on ne peut ni cliquer ni déplacer
+  // une fenêtre d'Enova pendant qu'on joue (l’auteur, 19 nov. 2026). Il se fait en deux temps : sur l'accueil, il envoie
+  // dans Paramètres ; là, le second montre la ligne à régler. L'identifiant du second est celui de l'étape « Ta touche
+  // pour la souris » des premiers pas (bienvenue.js, ID_SOURIS) : le finir la coche.
+  {
+    id: 'souris-accueil',
+    titre: 'D’abord : ta touche pour la souris',
+    chemin: '/',
+    etapes: [
+      {
+        titre: 'Avant tout : ta touche pour la souris',
+        texte: 'Pendant que tu joues, la souris appartient au jeu. Une combinaison de touches te la rend pour cliquer dans les fenêtres d’Enova et les déplacer, puis la rend au jeu. Sans elle, tu ne peux pas te servir des fenêtres en jeu : on la règle tout de suite, ça prend dix secondes.',
+      },
+      {
+        cible: '.topbar-settings',
+        action: 'clic',
+        titre: 'Ouvre les Paramètres',
+        texte: 'Clique sur « Paramètres » : je te montre où elle se règle.',
+      },
+    ],
+  },
+  {
+    id: 'touche-souris',
+    titre: 'Régler ta touche pour la souris',
+    chemin: '/parametres',
+    etapes: [
+      {
+        cible: '[data-tuto="parametres-raccourcis"]',
+        titre: 'Les raccourcis',
+        texte: 'C’est ici. Ces combinaisons marchent partout, même pendant que tu joues : c’est Enova qui les prend, elles n’arrivent jamais au jeu.',
+      },
+      {
+        cible: '[data-tuto="raccourci-souris"]',
+        titre: 'La touche de la souris',
+        texte: 'La première ligne. Sa combinaison est affichée à droite (Alt + Maj + K au départ). Pour la changer : clique dessus, puis presse la combinaison que tu veux, avec Ctrl ou Alt. Choisis-en une que le jeu n’utilise pas et que tu trouves sans regarder.',
+      },
+      {
+        cible: '[data-tuto="parametres-raccourcis"] .btn-primary',
+        titre: 'Enregistrer',
+        texte: 'Si tu l’as changée, clique sur « Enregistrer » : elle marche tout de suite, sans rien relancer.',
+      },
+      {
+        titre: 'Essaie-la en jeu',
+        texte: 'En jeu : presse ta combinaison, la souris apparaît et les fenêtres d’Enova se laissent cliquer et déplacer. Presse-la encore : la souris retourne au jeu. C’est le geste à connaître par cœur.',
+      },
+    ],
+  },
   {
     id: 'accueil',
     titre: 'Découvrir l’app',

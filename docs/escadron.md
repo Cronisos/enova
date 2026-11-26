@@ -167,7 +167,7 @@ de séance en français, au lieu d'un rapport par plugin.
 
 ## Partage avec l'escadron
 
-Un membre peut partager avec son escadron ses repères (minage au Rhino, minage en vaisseau et autres repères, trois
+Un membre peut partager avec son escadron ses repères (minage au Rhino, minage en vaisseau, sites gardiens et autres repères, quatre
 types séparés), ses builds de vaisseaux et ses routes commerciales. Chaque rubrique a son bouton « Partager à
 l'escadron » sur la fiche de l'objet, et son écran « Escadron » pour ce qui est reçu : Mes repères › Escadron,
 Builds › Escadron, Commerce › Escadron.

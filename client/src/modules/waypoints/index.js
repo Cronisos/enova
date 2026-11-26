@@ -4,7 +4,6 @@ import { modeInfo } from '../../core/modes.js';
 // Fenêtres en jeu, bandeaux et pages : chacun chargé quand il sert (App.jsx, Suspense), pas dans chaque fenêtre
 const MiningHud = lazy(() => import('./MiningHud.jsx'));
 const WaypointsListOverlay = lazy(() => import('./ListOverlay.jsx'));
-const CaptureFrame = lazy(() => import('./CaptureFrame.jsx'));
 const GuideOverlay = lazy(() => import('./GuideOverlay.jsx'));
 const SweepOverlay = lazy(() => import('./SweepOverlay.jsx'));
 const SweepTopOverlay = lazy(() => import('./SweepTop.jsx'));
@@ -22,9 +21,9 @@ export default {
   Component: WaypointsPage,
   Hud: MiningHud, // overlay : /hud/waypoints
   // Fenêtres en plus, ouvertes avec le mode : liste des repères (cachée, montrée par le bouton 📍 du HUD), guidage
-  // vers un repère (caché, montré par le bouton 🧭 d'un repère de la liste) et cadre de capture (photo du contenu d'un
-  // EEP ciblé, au bouton 📷 ou Alt+Maj+P) et balayage d'un EEP en SRV (caché, montré par le bouton 🎯 du HUD), avec son tiroir Top 10 collé à gauche (bouton 💎)
+  // vers un repère (caché, montré par le bouton 🧭 d'un repère de la liste) et balayage d'un EEP en SRV (caché, montré par le bouton 🎯 du HUD), avec son tiroir Top 10 collé à gauche (bouton 💎)
   // et celui du repère posé (📍 ou Alt+Maj+R : nom et minerai à corriger)
-  hudPages: { 'waypoints-list': WaypointsListOverlay, 'waypoints-guide': GuideOverlay, capture: CaptureFrame, 'waypoints-sweep': SweepOverlay, 'waypoints-sweep-top': SweepTopOverlay, 'waypoints-sweep-pose': SweepPoseOverlay },
+  // Le cadre de capture (CaptureFrame.jsx) n'est plus ouvert avec le mode depuis le 19 nov. 2026
+  hudPages: { 'waypoints-list': WaypointsListOverlay, 'waypoints-guide': GuideOverlay, 'waypoints-sweep': SweepOverlay, 'waypoints-sweep-top': SweepTopOverlay, 'waypoints-sweep-pose': SweepPoseOverlay },
   mode: modeInfo('waypoints'), // menu « Mode de jeu » (le minage en vaisseau a son propre mode) : core/modes.js
 };

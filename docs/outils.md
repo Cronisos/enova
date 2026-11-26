@@ -100,7 +100,7 @@ Case « Rachat » (fenêtre en jeu, sous la première ligne) et bloc « Rachat �
 `server/src/modules/glance/rebuy.js`, affichés par `client/src/modules/glance/Rebuy.jsx`. Tout est relu du journal au
 démarrage : rien n'est enregistré sur le disque. Dans la fenêtre en jeu, la case n'apparaît que quand elle dit quelque
 chose : rachat **non couvert**, décollage sans rachat, résurrection récente. Couvert, elle disparaît (toujours verte,
-elle n'apprenait rien) ; le mode de jeu passe alors en haut à droite de la case Crédits. Le panneau garde le bloc entier.
+elle n'apprenait rien) ; le mode de jeu est tout à droite de la barre de titre de la fenêtre. Le panneau garde le bloc entier.
 
 - **Rachat** du vaisseau piloté (`Loadout.Rebuy`, donné par le jeu) comparé à tes crédits (`Status.json` Balance, ou
   `LoadGame.Credits`) : vert « Couvert ✓ » avec le nombre de rachats d'avance, rouge « NON COUVERT » avec ce qui manque.

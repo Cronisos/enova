@@ -1,17 +1,19 @@
 // Mes vaisseaux : une carte par vaisseau, le vaisseau actuel d'abord et mis en avant. Sur chaque carte, ce qui le
 // reconnaît d'un coup d'œil (où il est, saut, soute, boucliers, rôle) ; un clic ouvre sa fiche (stats, modules). Un clic
-// sur un modèle (« Anaconda ×3 ») ne montre que ceux-là : « lequel de mes Anaconda est fité comment, et où ? ».
+// sur un modèle (« Anaconda ×3 ») ne montre que ceux-là : « lequel de mes Anaconda est fité comment, et où ? ». Un clic
+// sur un rôle (« ⛏ Minage Rhino ») ne montre que les vaisseaux qui le portent ; les deux filtres se combinent.
 
 import { useEffect, useState } from 'react';
 import { vaisseauxApi, useRechargeFlotte } from './api.js';
 import ShipImage from '../../core/ShipImage.jsx';
 import { shipTitle } from '../../core/ShipNickname.jsx';
 import RoleTags from '../../core/RoleTags.jsx';
+import { tagsRole } from '../../core/shipRole.js';
 import { useShipRoles } from '../../core/useShips.js';
 import { useGameState } from '../../core/useGameState.js';
 import NomSysteme from '../../core/NomSysteme.jsx';
 import FicheVaisseau from './FicheVaisseau.jsx';
-import { badgeIngenierie, chiffresCarte, modeles, ordreFlotte, padTexte } from './ficheVue.js';
+import { badgeIngenierie, chiffresCarte, modeles, ordreFlotte, padTexte, passeRole, rolesFlotte } from './ficheVue.js';
 
 /** Icône d'ingénierie : une clé plate et une étincelle (dessin original). */
 function IconeIngenierie() {
@@ -66,6 +68,7 @@ export default function FlottePage() {
   const [resumes, setResumes] = useState({});
   const [erreur, setErreur] = useState('');
   const [modele, setModele] = useState('');
+  const [role, setRole] = useState(''); // rôle filtré (id), SANS_ROLE, ou '' : tous
   const [ouvert, setOuvert] = useState(null); // shipId de la fiche ouverte
   const { roleOf } = useShipRoles();
   const { game } = useGameState();
@@ -80,7 +83,11 @@ export default function FlottePage() {
 
   if (!flotte) return <p className="muted">{erreur || 'Chargement…'}</p>;
   const tous = ordreFlotte(flotte, shipTitle);
-  const montres = modele ? tous.filter((s) => s.model === modele) : tous;
+  const tagsDe = (s) => tagsRole(roleOf(s.shipId));
+  const roles = rolesFlotte(flotte, tagsDe);
+  // Un rôle filtré que plus aucun vaisseau ne porte (rôle retiré depuis la fiche) : le filtre tombe
+  const roleActif = roles.some((r) => r.id === role) ? role : '';
+  const montres = tous.filter((s) => (!modele || s.model === modele) && passeRole(tagsDe(s), roleActif));
   const fiche = ouvert != null && flotte.find((s) => s.shipId === ouvert);
   return (
     <div className="page">
@@ -96,6 +103,19 @@ export default function FlottePage() {
           ))}
         </div>
       )}
+      {flotte.length > 1 && roles.length > 0 && (
+        <div className="vx-filtres vx-filtres-roles" role="group" aria-label="Rôles">
+          <button type="button" className={`vx-filtre${!roleActif ? ' is-on' : ''}`} onClick={() => setRole('')}>Tous les rôles</button>
+          {roles.map((r) => (
+            <button key={r.id} type="button" className={`vx-filtre vx-filtre-role${roleActif === r.id ? ' is-on' : ''}`} style={{ '--c': r.couleur }}
+              title={`Ne montrer que les vaisseaux ${r.label === 'Sans rôle' ? 'sans rôle' : `qui ont le rôle ${r.label} (principal ou secondaire)`}`}
+              onClick={() => setRole(roleActif === r.id ? '' : r.id)}>
+              {r.icone && <span aria-hidden="true">{r.icone} </span>}{r.label}<b>{r.nombre}</b>
+            </button>
+          ))}
+        </div>
+      )}
+      {flotte.length > 0 && !montres.length && <p className="muted">Aucun vaisseau ne correspond à ces deux filtres.</p>}
       <div className="vx-grille">
         {montres.map((s) => (
           <Carte key={s.shipId} s={s} resume={resumes[s.shipId]} role={roleOf(s.shipId)} ouvrir={() => setOuvert(s.shipId)} ici={game} />

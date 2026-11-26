@@ -78,7 +78,7 @@ const { plan: planRaccourcis } = require('./raccourcis.js');
 
 const HUD_SIZE = { width: 700, height: 124 };
 // Sauvetage : une ligne en plus en bas (matériaux par grade)
-const SIZES = { rescue: { width: 700, height: 150 }, waypoints: { width: 590, height: 124 }, carrier: { width: 340, height: 236 }, navroute: { width: 340, height: 236 }, fsdcool: { width: 300, height: 150 }, systeme: { width: 300, height: 140 }, ia: { width: 440, height: 150 } }; // HUD en carré (2 × 2) : taille propre
+const SIZES = { rescue: { width: 700, height: 150 }, waypoints: { width: 590, height: 124 }, carrier: { width: 340, height: 236 }, navroute: { width: 340, height: 236 }, fsdcool: { width: 572, height: 104 }, systeme: { width: 300, height: 140 }, ia: { width: 440, height: 150 } }; // HUD en carré (2 × 2) : taille propre
 const FREE = { glance: { width: 480, height: 460 }, signals: { width: 360, height: 380 }, 'waypoints-list': { width: 380, height: 440 }, 'waypoints-guide': { width: 320, height: 210 }, 'waypoints-sweep': { width: 340, height: 470 }, capture: { width: 420, height: 260 }, 'colonisation-list': { width: 340, height: 420 }, bouclier: { width: 260, height: 200 } }; // fenêtres libres : taille par défaut, redimensionnables
 const START_HIDDEN = new Set(['waypoints-list', 'waypoints-guide', 'waypoints-sweep', 'capture']); // ouvertes cachées, montrées au bouton
 // Tiroirs : une fenêtre collée au bord d'une autre, de sa hauteur, qui la suit. Toujours là (transparente, les clics
@@ -118,11 +118,20 @@ MINS.vigie = { width: 300, height: 100 };
 MINS['engineering-visit'] = { width: 320, height: 160 };
 MINS['engineering-passage'] = { width: 300, height: 90 };
 MINS.bilan = { width: 320, height: 120 };
+// Alerte « hangar sans véhicule » (modules/hangar), ouverte par le serveur au décollage
+FREE['hangar-vide'] = { width: 440, height: 150 };
+// Alerte « rares en stock » (modules/rares, catalogue), ouverte par le serveur après un relevé
+FREE['rares-alerte'] = { width: 560, height: 170 };
+MINS['rares-alerte'] = { width: 340, height: 100 };
+// Site gardien en vue (modules/gardiens) : carte et ordre des pylônes
+FREE['gardiens-site'] = { width: 520, height: 420 };
+MINS['gardiens-site'] = { width: 320, height: 120 };
+MINS['hangar-vide'] = { width: 300, height: 100 };
 MINS.compagnon = { width: 200, height: 100 };
 const FREE_PLACES = { compagnon: (area, size) => ({ x: area.x + 20, y: area.y + Math.round(area.height * 0.62) - size.height }) };
 // Fenêtres qui prennent la hauteur de leur contenu (autoHeight de PanelOverlay, IPC 'fit-height') : elles grandissent
 // vers le bas, la place par défaut des autres évite la colonne sous elles.
-const GROWS = new Set(['glance', 'colonisation-list', 'colonisation-station', 'engineering-visit', 'engineering-passage', 'bilan', 'vigie']);
+const GROWS = new Set(['glance', 'colonisation-list', 'colonisation-station', 'engineering-visit', 'engineering-passage', 'bilan', 'vigie', 'hangar-vide', 'rares-alerte', 'gardiens-site']);
 // Seules ces fenêtres demandent leur hauteur (PanelOverlay autoHeight) : une autre page qui la demanderait (jusqu'à toute
 // la hauteur de l'écran, pour photographier ou couvrir plus) est ignorée
 const FIT_HEIGHT = GROWS;
@@ -921,6 +930,16 @@ if (startup === 'transmettre') {
       const b = win.getBounds();
       const min = own(MINS, page) || MIN;
       win.setBounds(fitInside({ ...b, width: Math.max(min.width, b.width + Number(dw || 0)), height: Math.max(min.height, b.height + Number(dh || 0)) }));
+    });
+    // Bouton ↔ du mode déplacement : la fenêtre se centre de gauche à droite sur l'écran où elle est ; sa hauteur à
+    // l'écran et sa taille ne changent pas. Jamais un tiroir (il suit sa fenêtre), jamais hors déplacement.
+    ipcMain.on('center-h', (event) => {
+      const page = pageFrom(event);
+      const entry = page && windows.get(page);
+      if (!entry || !entry.editing || own(DOCKED, page)) return;
+      const b = entry.win.getBounds();
+      const area = screen.getDisplayMatching(b).workArea;
+      entry.win.setBounds({ ...b, x: area.x + Math.round((area.width - b.width) / 2) });
     });
     // Fenêtre ouverte cachée, montrée ou cachée par le bouton d'une autre page (liste des repères…)
     // Seulement depuis une fenêtre de l'overlay, et pour une fenêtre connue (sinon ignoré)

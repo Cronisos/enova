@@ -91,7 +91,9 @@ function centrerSur(zone, { width, height }) {
 function placeBarre(zone, { width, height }, mar = MAR_DEFAUT) {
   const borne = (v, min, max) => Math.round(Math.min(max, Math.max(min, Number.isFinite(v) ? v : min)));
   const { coin, decalage, decalageY } = reglageMar(mar);
-  const w = borne(width, 120, Math.min(1400, zone.width - 16));
+  // Largeur minimale basse : tout caché, le MAR se réduit à son logo (38 px). Une fenêtre plus large que lui laissait
+  // à sa droite une bande invisible qui prenait les clics du jeu (24 nov. 2026, minimum de 120 px).
+  const w = borne(width, 30, Math.min(1400, zone.width - 16));
   const h = borne(height, 30, Math.min(900, zone.height - 16));
   const d = Math.min(decalage, Math.max(0, zone.width - 16 - w)); // jamais hors de l'écran
   const x = coin.endsWith('droite') ? zone.x + zone.width - w - 8 - d : zone.x + 8 + d;

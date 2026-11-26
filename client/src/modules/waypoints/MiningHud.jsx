@@ -15,9 +15,7 @@ export default function MiningHud() {
   const { data: s } = useLiveSession('/modules/waypoints', 'waypoints:session', { horloge: false }); // sa propre horloge (now)
   const now = useNow(1000);
   // Bouton 📍 : montre ou cache la fenêtre des repères du système (ouverte cachée avec le mode)
-  // Bouton 📷 : montre ou cache le cadre de capture (Alt+Maj+P photographie sa zone même caché)
   const list = useHiddenWindow('waypoints-list');
-  const frame = useHiddenWindow('capture');
   // Bouton 🎯 : montre ou cache le balayage de l'EEP (centre, bord, cercles à suivre pour que le scanner voie tout)
   const sweep = useHiddenWindow('waypoints-sweep');
   // Retour sur une planète déjà minée : le serveur ouvre la boussole vers ta dernière tonne, puis la range à la suivante
@@ -29,7 +27,6 @@ export default function MiningHud() {
   const soute = useSouteSurvol(s?.cargo?.shipItems, s?.cargo?.ship);
   const buttons = [
     { icon: '🎯', title: sweep.shown ? 'Cacher le balayage de l’EEP' : 'Afficher le balayage de l’EEP', onClick: sweep.toggle, active: sweep.shown },
-    { icon: '📷', title: frame.shown ? 'Cacher le cadre de capture' : 'Afficher le cadre de capture', onClick: frame.toggle, active: frame.shown },
     { icon: '📍', title: list.shown ? 'Cacher les repères du système' : 'Afficher les repères du système', onClick: list.toggle, active: list.shown },
   ];
 

@@ -26,6 +26,10 @@ export const wpApi = {
   // (POST, avec l'en-tête maison), qu'une lecture venue d'ailleurs (image, lien) ne peut pas imiter
   sweepMarkets: (online = false) => (online ? api(`${base}/sweep/markets/load`, { method: 'POST' }) : api(`${base}/sweep/markets`)),
   sweepTopOres: () => api(`${base}/sweep/top-ores`),
+  // Guide des ressources : tes observations (journaux), sans réseau
+  guide: () => api(`${base}/guide`),
+  // Chercher un minerai : les endroits connus, tous systèmes confondus (base locale, sans réseau)
+  chercher: () => api(`${base}/chercher`),
   sweepCenter: () => api(`${base}/sweep/center`, { method: 'POST' }),
   sweepEdge: () => api(`${base}/sweep/edge`, { method: 'POST' }),
   sweepReset: () => api(`${base}/sweep`, { method: 'DELETE' }),

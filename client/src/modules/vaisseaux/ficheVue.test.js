@@ -2,7 +2,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resumeEcart, badgeIngenierie, barresGrade, chiffresCarte, credits, groupesStats, modeles, modulesParGroupe, ordreFlotte, padTexte, resistances, texteIngenierie } from './ficheVue.js';
+import { resumeEcart, badgeIngenierie, barresGrade, chiffresCarte, credits, groupesStats, modeles, modulesParGroupe, ordreFlotte, padTexte, passeRole, resistances, rolesFlotte, SANS_ROLE, texteIngenierie } from './ficheVue.js';
 
 const NB = ' '; // espace fine insécable des milliers (fr-FR)
 
@@ -92,4 +92,19 @@ test('résumé de ce qu’il te faut pour un build', () => {
   assert.equal(resumeEcart({ identique: false, achats: 2, ingenierie: 1, retraits: 0 }), '2 modules à acheter · 1 modification');
   assert.equal(resumeEcart({ identique: false, achats: 0, ingenierie: 3, retraits: 1 }), '3 modifications · 1 à retirer');
   assert.equal(resumeEcart(null), 'Écart indisponible');
+});
+
+test('filtre par rôle : rôles portés par la flotte (principal ou secondaire), comptés, « Sans rôle » à la fin', () => {
+  const tag = (id, label) => ({ id, label, icone: '', couleur: '#fff' });
+  const tags = { 1: [tag('waypoints', 'Minage Rhino'), tag('routes', 'Commerce')], 2: [tag('routes', 'Commerce')], 3: [], 4: [tag('combat', 'Combat')] };
+  const flotte = [{ shipId: 1 }, { shipId: 2 }, { shipId: 3 }, { shipId: 4 }];
+  const roles = rolesFlotte(flotte, (s) => tags[s.shipId]);
+  assert.deepEqual(roles.map((r) => [r.id, r.nombre]), [['routes', 2], ['combat', 1], ['waypoints', 1], [SANS_ROLE, 1]]);
+  assert.deepEqual(rolesFlotte([{ shipId: 2 }], (s) => tags[s.shipId]).map((r) => r.id), ['routes'], 'pas de « Sans rôle » si tous en ont un');
+  const passent = (role) => flotte.filter((s) => passeRole(tags[s.shipId], role)).map((s) => s.shipId);
+  assert.deepEqual(passent(''), [1, 2, 3, 4]);
+  assert.deepEqual(passent('routes'), [1, 2]);
+  assert.deepEqual(passent('waypoints'), [1]);
+  assert.deepEqual(passent(SANS_ROLE), [3]);
+  assert.deepEqual(passent('inconnu'), []);
 });

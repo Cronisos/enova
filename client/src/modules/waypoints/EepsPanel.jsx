@@ -9,7 +9,7 @@ import Modale from '../../core/Modale.jsx';
 import NomSysteme from '../../core/NomSysteme.jsx';
 import { dateTime } from '../../core/format.js';
 import { meters, wpApi } from './api.js';
-import { ORE_COLORS, UNKNOWN_ORE } from './oreColors.js';
+import { couleurMinerai } from './oreColors.js';
 import CarteEEP from './CarteEEP.jsx';
 
 const pct = (p) => `${Math.floor((p || 0) * 100)} %`;
@@ -63,7 +63,7 @@ async function image(e, vue) {
   g.font = '18px "Segoe UI", system-ui, sans-serif';
   for (const m of e.minerais) {
     const t = `${m.ore} ×${m.n}`;
-    g.fillStyle = ORE_COLORS[m.ore] || UNKNOWN_ORE;
+    g.fillStyle = couleurMinerai(m.ore);
     g.fillRect(x, 1030, 12, 12);
     g.fillStyle = '#dfe4ea';
     g.fillText(t, x + 18, 1042);
@@ -93,7 +93,7 @@ function CarteModale({ id, onFermer }) {
           {d.state === 'ready' ? <CarteEEP v={d.vue} className="eep-svg" /> : <p className="muted">Bord pas encore marqué : pas de carte.</p>}
           {d.minerais.length > 0 && (
             <p className="eep-minerais">
-              {d.minerais.map((m) => <span key={m.ore}><i style={{ background: ORE_COLORS[m.ore] || UNKNOWN_ORE }} />{m.ore} ×{m.n}</span>)}
+              {d.minerais.map((m) => <span key={m.ore}><i style={{ background: couleurMinerai(m.ore) }} />{m.ore} ×{m.n}</span>)}
             </p>
           )}
         </div>
@@ -203,7 +203,7 @@ export default function EepsPanel() {
                 </p>
                 {e.minerais.length > 0 && (
                   <p className="eep-minerais">
-                    {e.minerais.map((m) => <span key={m.ore}><i style={{ background: ORE_COLORS[m.ore] || UNKNOWN_ORE }} />{m.ore} ×{m.n}</span>)}
+                    {e.minerais.map((m) => <span key={m.ore}><i style={{ background: couleurMinerai(m.ore) }} />{m.ore} ×{m.n}</span>)}
                   </p>
                 )}
                 <div className="form-actions">

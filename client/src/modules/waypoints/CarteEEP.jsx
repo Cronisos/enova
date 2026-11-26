@@ -4,7 +4,7 @@
 // l'image à partager. Couleurs passées en style, jamais en attribut SVG : les attributs ne lisent pas les variables CSS
 // (teinte de l'app) ; pour l'image, la teinte est donnée en clair (accRgb), l'image n'ayant pas la feuille de style.
 
-import { LAST_SPOT, ORE_COLORS, UNKNOWN_ORE } from './oreColors.js';
+import { LAST_SPOT, couleurMinerai } from './oreColors.js';
 import { DrillMarks } from './DrillsPanel.jsx';
 
 /** Point à `r` du centre, cap `a` (° depuis le nord, sens horaire), dans le repère du dessin (y vers le bas). */
@@ -49,7 +49,7 @@ export default function CarteEEP({ v, pick = () => {}, drills = null, accRgb = n
   const n = v.steps[0]?.sectors.length || 36;
   const marks = (v.marks || []).map((m) => {
     const p = place(m, k);
-    const color = m.auto ? LAST_SPOT : ORE_COLORS[m.ore] || UNKNOWN_ORE;
+    const color = m.auto ? LAST_SPOT : couleurMinerai(m.ore);
     const hollow = m.depleted || m.unprofitable;
     return (
       <g key={`m${m.id}`} transform={`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`}

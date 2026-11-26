@@ -7,7 +7,7 @@ const { findPlace, MARGIN, TOP } = require('./place.js');
 const AREA = { x: 0, y: 0, width: 1920, height: 1040 }; // 1080p, barre des tâches de 40 px
 const HUD = { width: 700, height: 124 };
 // Mêmes tailles que overlay/main.js (HUD_SIZE, SIZES, FREE)
-const SIZES = { waypoints: { width: 590, height: 124 }, carrier: { width: 340, height: 236 }, navroute: { width: 340, height: 236 }, fsdcool: { width: 300, height: 150 } };
+const SIZES = { waypoints: { width: 590, height: 124 }, carrier: { width: 340, height: 236 }, navroute: { width: 340, height: 236 }, fsdcool: { width: 572, height: 104 } };
 const FREE = {
   glance: { width: 480, height: 460 }, signals: { width: 360, height: 380 }, 'waypoints-list': { width: 380, height: 440 },
   'waypoints-guide': { width: 320, height: 210 }, 'waypoints-sweep': { width: 340, height: 470 }, capture: { width: 420, height: 260 },

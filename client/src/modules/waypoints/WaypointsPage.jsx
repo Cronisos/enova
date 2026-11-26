@@ -14,6 +14,8 @@ import { echapRemonte, uneFois } from './gardes.js';
 import { groupByPlace, shortPlace } from './places.js';
 import { EepView, findPlanet, OnlineChoice, OnlineLine, PlanetView, SystemsView, SystemView, useOnlineSetting, useSurvey, WaypointRow } from './Survey.jsx';
 import { CapturesPanel } from './Captures.jsx';
+import GuideRessources from './GuideRessources.jsx';
+import ChercherMinerai from './ChercherMinerai.jsx';
 import NomSysteme from '../../core/NomSysteme.jsx';
 import { BoutonPartager, RecusEscadron } from '../../core/PartageEscadron.jsx';
 import { GENRES_REPERES, TYPES_REPERES, donneesRepere, genreRepere, lieuRepere } from './partageRepere.js';
@@ -23,7 +25,7 @@ import { GENRES_REPERES, TYPES_REPERES, donneesRepere, genreRepere, lieuRepere }
 //   /reperes/planete/<p>            une planète : verdict, grille de ses EEP
 //   /reperes/planete/<p>/eep/<n>    un EEP : gisements, repères, dernière capture
 //   /reperes/repere/<id>            un repère : guidage, session, actions
-//   /reperes/liste, /captures, /session, /historique, /systemes
+//   /reperes/liste, /guide, /captures, /session, /historique, /systemes
 
 const BASE = '/reperes';
 const planetPath = (body) => `${BASE}/planete/${encodeURIComponent(body)}`;
@@ -288,10 +290,13 @@ function ListView({ ctx }) {
   const nav = useNavigate();
   const [filter, setFilter] = useState({ q: '', category: '' });
   const [tab, setTab] = useState('main');
-  const [allSystems, setAllSystems] = useState(false);
+  const [tousDemandes, setAllSystems] = useState(false);
   const { list, here, categories } = ctx;
   const q = filter.q.trim().toLowerCase();
   const system = here?.system?.toLowerCase();
+  // Aucun repère dans le système où tu es : montrer ceux de tous les systèmes, plutôt qu'une liste vide
+  const aucunIci = Boolean(system) && !list.some((w) => String(w.system || '').toLowerCase() === system);
+  const allSystems = tousDemandes || aucunIci;
   const inSystem = (w) => allSystems || !system || String(w.system || '').toLowerCase() === system;
   const tabCount = (k) => list.filter((w) => tabOf(w) === k && inSystem(w)).length;
   const shown = list.filter((w) =>
@@ -316,7 +321,7 @@ function ListView({ ctx }) {
             <option value="">tous les types</option>
             {Object.entries(categories).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
-          {system && (
+          {system && !aucunIci && (
             <button className={`btn small ${allSystems ? 'btn-primary' : ''}`} onClick={() => setAllSystems(!allSystems)} title="Par défaut, seuls les repères du système où tu es">
               {allSystems ? `Seulement ${here.system}` : `Tous les systèmes (${list.filter((w) => tabOf(w) === tab).length})`}
             </button>
@@ -410,7 +415,7 @@ export default function WaypointsPage() {
   const saveSite = (planet, change) => run(async () => setSurvey(await wpApi.saveSite({ system: survey.system, systemAddress: survey.systemAddress, body: planet.body, ...change })));
   const saveBody = (planet, change) => run(async () => setSurvey(await wpApi.saveBody({ system: survey.system, systemAddress: survey.systemAddress, body: planet.body, ...change })));
 
-  const root = { label: survey?.system || here?.system || 'Mes repères', to: BASE };
+  const root = { label: survey?.system || here?.system || 'Mes repères', to: `${BASE}/ici` };
   const planetCrumb = (body) => ({ label: `🪐 ${findPlanet(survey, body)?.name || shortPlace(body, survey?.system || here?.system)}`, to: planetPath(body) });
   /** Fil d'Ariane d'un repère : système › planète › EEP › repère. */
   const crumbsFor = (w) => [
@@ -425,14 +430,27 @@ export default function WaypointsPage() {
   const openWaypoint = (w) => nav(waypointPath(w.id));
 
   const screen = { root, planetCrumb, survey, here, list, captures, saveBody, saveSite, openSite, openWaypoint, mark, marking };
-  const menu = [
-    { to: 'liste', icon: '📍', label: 'Tous mes repères', sub: `${list.length} repère${list.length > 1 ? 's' : ''}` },
-    { to: 'captures', icon: '📷', label: 'Captures', sub: `${captures.length} photo${captures.length > 1 ? 's' : ''}` },
-    { to: 'escadron', icon: '🤝', label: 'Escadron', sub: 'repères partagés par les membres' },
-    { to: 'eeps', icon: '🎯', label: 'EEP balayés', sub: 'leurs cartes, à revoir ou partager' },
-    { to: 'historique', icon: '📊', label: 'Sessions passées', sub: `${sessions.length} session${sessions.length > 1 ? 's' : ''}` },
-    { to: 'systemes', icon: '🌌', label: 'Systèmes prospectés', sub: 'leurs planètes rentables' },
+  // Onglets de la page (refonte du 19 nov. 2026) : « Chercher » un minerai en accueil, puis le système où l'on est, puis
+  // le reste. Ils remplacent les tuiles, et restent visibles sur chaque écran.
+  const onglets = [
+    { to: '', label: 'Chercher', titre: 'Où trouver un minerai, tous systèmes confondus' },
+    { to: 'ici', label: 'Ici', titre: 'Les planètes du système où tu es' },
+    { to: 'liste', label: `Mes repères (${list.length})`, titre: 'Tous tes repères' },
+    { to: 'eeps', label: 'Cartes d’EEP', titre: 'Les EEP balayés, à revoir ou partager' },
+    { to: 'historique', label: `Sessions (${sessions.length})`, titre: 'Tes sessions de minage passées' },
+    { to: 'escadron', label: 'Escadron', titre: 'Repères partagés par les membres' },
+    { to: 'systemes', label: 'Systèmes', titre: 'Les systèmes prospectés et leurs planètes rentables' },
+    { to: 'guide', label: 'Guide', titre: 'Sur quel type de monde chercher chaque ressource' },
   ];
+  const sousChemin = location.pathname.replace(/\/+$/, '').slice(BASE.length).replace(/^\//, '');
+  const ongletActif = (o) => (o.to === '' ? sousChemin === '' : sousChemin === o.to || sousChemin.startsWith(`${o.to}/`))
+    // Une planète, un EEP ou un repère ouverts : on est dans « Ici » (le relevé d'un système)
+    || (o.to === 'ici' && /^(planete|repere)\//.test(sousChemin));
+  /** Ouvre un endroit trouvé par « Chercher » : son système devient celui du relevé, puis son EEP s'ouvre. */
+  const ouvrirLieu = (l) => {
+    setOther(l.system === here?.system ? null : { system: l.system, systemAddress: l.systemAddress });
+    nav(sitePath(l.body, l.eep));
+  };
 
   return (
     <div className="page">
@@ -456,21 +474,24 @@ export default function WaypointsPage() {
         </div>
         <span className="survey-grow" />
         {session && <button className="btn" onClick={() => nav(`${BASE}/session`)}>⛏ Session en cours</button>}
-        <button className="btn btn-primary" onClick={() => mark()} disabled={!here?.system || marking}>📍 Marquer ici</button>
+        {/* À quai, rien à marquer : une station n'a pas de coordonnées de surface (l’auteur, 19 nov. 2026) */}
+        {!here?.station && <button className="btn btn-primary" onClick={() => mark()} disabled={!here?.system || marking}>📍 Marquer ici</button>}
       </section>
       {error && <p className="bad">{error}</p>}
 
+      <nav className="wp-onglets" aria-label="Mes repères">
+        {onglets.map((o) => (
+          <button key={o.to || 'chercher'} type="button" className={ongletActif(o) ? 'is-on' : ''} title={o.titre} onClick={() => nav(o.to ? `${BASE}/${o.to}` : BASE)}>{o.label}</button>
+        ))}
+      </nav>
+
       <Routes>
         <Route index element={(
+          <ChercherMinerai ici={here?.system} ouvrir={ouvrirLieu}
+            ouvrirSysteme={(g) => { setOther(g.system === here?.system ? null : { system: g.system, systemAddress: g.systemAddress }); nav(`${BASE}/ici`); }} />
+        )} />
+        <Route path="ici" element={(
           <>
-            <nav className="wp-menu">
-              {menu.map((m) => (
-                <button key={m.to} className="wp-menu-item" onClick={() => nav(`${BASE}/${m.to}`)}>
-                  <span className="wp-menu-icon">{m.icon}</span>
-                  <span><b>{m.label}</b><small>{m.sub}</small></span>
-                </button>
-              ))}
-            </nav>
             <OnlineChoice online={online} />
             <SystemView survey={survey} here={here} other={other} onBackHome={() => setOther(null)} openPlanet={openPlanet} openSite={openSite} onLoadSpansh={loadSpansh} />
             <OnlineLine online={online} />
@@ -482,6 +503,7 @@ export default function WaypointsPage() {
         <Route path="liste" element={<ListView ctx={ctx} />} />
         <Route path="escadron" element={<EscadronScreen ctx={ctx} />} />
         <Route path="eeps" element={<><ViewHead crumbs={[root, { label: 'EEP balayés' }]} /><EepsPanel /></>} />
+        <Route path="guide" element={<><ViewHead crumbs={[root, { label: 'Guide des ressources' }]} /><GuideRessources /></>} />
         <Route path="captures" element={<><ViewHead crumbs={[root, { label: 'Captures' }]} /><CapturesPanel /></>} />
         <Route path="session" element={(
           <>
@@ -504,7 +526,7 @@ export default function WaypointsPage() {
         <Route path="systemes" element={(
           <>
             <ViewHead crumbs={[root, { label: 'Systèmes prospectés' }]} />
-            <SystemsView current={survey?.system} onPick={(s) => { setOther(s.system === here?.system ? null : s); nav(BASE); }} />
+            <SystemsView current={survey?.system} onPick={(s) => { setOther(s.system === here?.system ? null : s); nav(`${BASE}/ici`); }} />
           </>
         )} />
         <Route path="*" element={<PageIntrouvable retour={BASE} nom="Mes repères" />} />

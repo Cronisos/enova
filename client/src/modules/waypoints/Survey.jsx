@@ -2,6 +2,8 @@ import { tileCount } from './surveyTiles.js';
 import { useEffect, useState } from 'react';
 import { useEvent } from '../../core/stream.js';
 import { coords, wpApi } from './api.js';
+import { couleurMinerai } from './oreColors.js';
+import IconeMonde from './IconeMonde.jsx';
 import { isDepleted } from './tabs.js';
 import { shortPlace } from './places.js';
 import NomSysteme from '../../core/NomSysteme.jsx';
@@ -145,7 +147,7 @@ function SpanshLine({ spansh, onLoad }) {
   );
 }
 
-/** « Iridium · EEP 4, 7 » : ce qu'on peut venir chercher sur une planète. */
+/** « ● Iridium · EEP 4, 7 » : ce qu'on peut venir chercher sur une planète, chaque minerai à sa couleur. */
 export function OreSummary({ ores, weak = false }) {
   const good = ores.filter((o) => o.good.length);
   const rest = weak ? ores.filter((o) => !o.good.length) : [];
@@ -153,90 +155,102 @@ export function OreSummary({ ores, weak = false }) {
   return (
     <span className="survey-ores">
       {good.map((o) => (
-        <span key={o.ore} className="pill pill-good" title={o.good.map((x) => `EEP ${x.number}${x.rating ? ` : ${x.rating}/10` : ''}`).join('\n')}>
-          {o.ore} · EEP {o.good.map((x) => x.number).join(', ')}
+        <span key={o.ore} className="pl-minerai" style={{ '--c': couleurMinerai(o.ore) }} title={o.good.map((x) => `EEP ${x.number}${x.rating ? ` : ${x.rating}/10` : ''}`).join('\n')}>
+          <i aria-hidden="true" />{o.ore}<small>EEP {o.good.map((x) => x.number).join(', ')}</small>
         </span>
       ))}
       {rest.map((o) => (
-        <span key={o.ore} className="pill pill-muted" title="dans des EEP pas encore notés ou faibles">{o.ore}</span>
+        <span key={o.ore} className="pl-minerai is-faible" style={{ '--c': couleurMinerai(o.ore) }} title="dans des EEP pas encore notés ou faibles"><i aria-hidden="true" />{o.ore}</span>
       ))}
     </span>
   );
 }
 
-/** Ligne d'un repère : un clic l'ouvre (guidage, actions). */
+/**
+ * Ligne d'un repère : un clic l'ouvre (guidage, actions). L'essentiel seulement (refonte du 19 nov. 2026) : le minerai
+ * à sa couleur, l'EEP, les foreuses, et son état s'il n'est plus bon. Les coordonnées sont sur sa fiche ; le type n'est
+ * dit que s'il n'est pas un repère de minage.
+ */
 export function WaypointRow({ w, onOpen, place = false }) {
+  const auto = /Fin du dernier minage/.test(w.label);
   return (
-    <button className="wp-row" onClick={() => onOpen(w)}>
-      <span className="wp-row-main">
-        <b>📍 {w.label}</b>
-        {w.siteNumber != null && <span className="pill pill-eep">EEP {w.siteNumber}</span>}
-        {w.drills != null && <span className="pill pill-info">{w.drills} foreuse{w.drills > 1 ? 's' : ''}</span>}
-        {w.unprofitable && <span className="pill pill-bad">pas rentable</span>}
-        {isDepleted(w) && <span className="pill pill-warn">tari</span>}
-        <span className="pill pill-info">{w.categoryLabel}</span>
-      </span>
-      <span className="small muted">
-        {place && (w.body || w.station) && <>{shortPlace(w.body || w.station, w.system)} · </>}
-        {w.latitude != null ? coords(w.latitude, w.longitude) : 'sans coordonnées'}
-      </span>
+    <button className={`wp-row rp-ligne${auto ? ' is-auto' : ''}`} style={{ '--c': couleurMinerai(w.label) }} onClick={() => onOpen(w)}>
+      <i className="rp-pastille" aria-hidden="true" />
+      <b className="rp-nom">{w.label}</b>
+      {w.siteNumber != null && <span className="rp-eep">EEP {w.siteNumber}</span>}
+      {w.drills != null && <span className="rp-foreuses">{w.drills} foreuse{w.drills > 1 ? 's' : ''}</span>}
+      {w.unprofitable && <span className="pill pill-bad">pas rentable</span>}
+      {isDepleted(w) && <span className="pill pill-warn">tari</span>}
+      {w.category !== 'mining' && <span className="rp-type">{w.categoryLabel}</span>}
+      {place && (w.body || w.station) && <span className="rp-lieu">{shortPlace(w.body || w.station, w.system)}</span>}
+      {w.latitude == null && w.category === 'mining' && <span className="rp-type">sans coordonnées</span>}
       <span className="wp-row-go">›</span>
     </button>
   );
 }
 
-/** Carte d'une planète dans l'écran du système : verdict, type, EEP vus, minerais à aller chercher. */
+/**
+ * Ligne d'une planète dans l'écran du système : son nom, son type, ce qu'on y trouve (minerais à leur couleur), et à
+ * droite sa meilleure note et où en est sa prospection. Le verdict est dit par la section où elle est rangée.
+ */
 function PlanetCard({ planet, current, onOpen }) {
-  const v = VERDICTS[planet.verdict];
   return (
-    <button className={`survey-planet survey-planet-card is-${planet.verdict} ${planet.here ? 'is-here' : ''}`} onClick={onOpen}>
-      <span className={`pill ${v.pill} survey-verdict`}>{v.icon} {v.label}</span>
-      <span className="survey-planet-name">🪐 {planet.name}</span>
-      {planet.type && <span className={`pill survey-type is-${typeKey(planet.type)}`}>{planet.type}</span>}
-      {planet.here && <span className="pill pill-eep">📍 tu es ici{current?.site != null && ` · EEP ${current.site}`}</span>}
-      <span className="small muted">
-        {[ls(planet.distance), gravity(planet.gravity), planet.count != null ? `${planet.seen} EEP vus sur ${planet.count}` : `${planet.seen} EEP vus`, retour(planet)]
-          .filter(Boolean).join(' · ')}
-        {planet.good > 0 && <> · <b className="good">{planet.good} rentable{planet.good > 1 ? 's' : ''}</b></>}
-        {planet.best && <> · meilleur EEP <b>{planet.best}/10</b></>}
+    <button className={`pl-ligne is-${planet.verdict}${planet.here ? ' is-here' : ''}`} onClick={onOpen}>
+      <span className="pl-nom">
+        <b>{planet.name}</b>
+        {planet.type && <small><IconeMonde type={planet.type} taille={14} />{planet.type}</small>}
       </span>
-      <OreSummary ores={planet.ores} />
+      <span className="pl-quoi">
+        {planet.here && <span className="pl-ici">tu es ici{current?.site != null && ` · EEP ${current.site}`}</span>}
+        <OreSummary ores={planet.ores} />
+        {retour(planet) && <span className="small muted">{retour(planet)}</span>}
+      </span>
+      <span className="pl-bilan" title={planet.count != null ? `${planet.seen} EEP vus sur ${planet.count}` : `${planet.seen} EEP vus`}>
+        {planet.best && <b className="pl-note">{planet.best}<small>/10</small></b>}
+        <small>{planet.count != null ? `${planet.seen}/${planet.count} EEP` : `${planet.seen} EEP`}</small>
+      </span>
       <span className="wp-row-go">›</span>
     </button>
   );
 }
 
-/** Écran du système : bilan, EEP ciblé en jeu, et les planètes à EEP, les rentables d'abord. */
+// Sections de l'écran du système, dans l'ordre : ce qui se mine d'abord, le reste replié
+const SECTIONS = [
+  { verdicts: ['good'], titre: 'Rentables', classe: 'is-good' },
+  { verdicts: ['depleted'], titre: 'Taries', classe: 'is-depleted' },
+  { verdicts: ['low'], titre: 'Petits gisements', classe: 'is-low' },
+  { verdicts: ['unknown'], titre: 'À prospecter', classe: 'is-unknown' }, // toujours dépliée (Cronisos, 19 nov. 2026)
+  { verdicts: ['bad', 'out'], titre: 'Écartées', classe: 'is-out', replie: true },
+];
+
+/** Écran du système : l'EEP ciblé en jeu, puis les planètes à EEP rangées par verdict, les rentables d'abord. */
 export function SystemView({ survey, here, other, onBackHome, openPlanet, openSite, onLoadSpansh }) {
   if (!survey) return <p className="muted">{here?.system ? 'Chargement…' : 'Position inconnue : lance le jeu.'}</p>;
-  const t = survey.totals;
   const target = survey.current?.site != null && survey.planets.find((p) => p.here);
+  const sections = SECTIONS.map((sec) => ({ ...sec, planetes: survey.planets.filter((p) => sec.verdicts.includes(p.verdict)) })).filter((sec) => sec.planetes.length);
   return (
-    <section className="panel">
+    <section className="panel pl">
       <div className="survey-top">
         <h2><NomSysteme nom={survey.system} /></h2>
         {other && <button className="btn small" onClick={onBackHome}>↩ Revenir au système où je suis</button>}
       </div>
-      <p className="small muted">
-        {t.planets ? (
-          <>
-            {t.planets} planète{t.planets > 1 ? 's' : ''} à EEP · <b className="good">{t.good} rentable{t.good > 1 ? 's' : ''}</b>
-            {t.depleted > 0 && ` · ${t.depleted} tarie${t.depleted > 1 ? 's' : ''}`}
-            {t.low > 0 && ` · ${t.low} à petits gisements`}
-            {' '}· {t.out} écartée{t.out > 1 ? 's' : ''} · {t.unknown} à prospecter
-          </>
-        ) : 'Aucune planète à EEP connue dans ce système (ni scannée, ni relevée sur Spansh).'}
-. Un EEP est rentable à partir de {GOOD_RATING}/10.
-      </p>
-      {onLoadSpansh && <SpanshLine spansh={survey.spansh} onLoad={onLoadSpansh} />}
       {target && (
         <button className="wp-target" onClick={() => openSite(target.body, survey.current.site)}>
           🎯 EEP {survey.current.site} ciblé en jeu · planète {target.name} <span className="wp-row-go">›</span>
         </button>
       )}
-      <div className="survey-planets">
-        {survey.planets.map((p) => <PlanetCard key={p.body} planet={p} current={survey.current} onOpen={() => openPlanet(p.body)} />)}
-      </div>
+      {!sections.length && <p className="muted">Aucune planète à EEP connue dans ce système (ni scannée, ni relevée sur Spansh).</p>}
+      {sections.map((sec) => {
+        const lignes = <div className="pl-liste">{sec.planetes.map((p) => <PlanetCard key={p.body} planet={p} current={survey.current} onOpen={() => openPlanet(p.body)} />)}</div>;
+        const titre = <>{sec.titre} <b>{sec.planetes.length}</b></>;
+        // Une planète où tu es ne se cache pas dans une section repliée
+        // … ni quand elle est la seule de l'écran (système tout juste arrivé : rien d'autre à montrer)
+        return sec.replie && sections.length > 1 && !sec.planetes.some((p) => p.here)
+          ? <details key={sec.titre} className={`pl-section ${sec.classe}`}><summary>{titre}</summary>{lignes}</details>
+          : <div key={sec.titre} className={`pl-section ${sec.classe}`}><h3>{titre}</h3>{lignes}</div>;
+      })}
+      <p className="tiny muted" title={`Un EEP est rentable à partir de ${GOOD_RATING}/10`}>Un EEP est rentable à partir de {GOOD_RATING}/10.</p>
+      {onLoadSpansh && <SpanshLine spansh={survey.spansh} onLoad={onLoadSpansh} />}
     </section>
   );
 }

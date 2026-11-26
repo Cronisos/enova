@@ -10,6 +10,7 @@
 export const TYPES_AUTO = {
   'repere-rhino': 'Repères de minage au Rhino',
   'repere-minage': 'Repères de minage en vaisseau',
+  'repere-gardien': 'Sites gardiens',
   repere: 'Autres repères',
   'route-commerce': 'Routes commerciales',
 };
@@ -19,8 +20,9 @@ const MAX_ROUTES = 30; // routes commerciales lues par passage (une lecture par 
 const txt = (v, max) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null);
 const nombre = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
-/** Minage posé au sol (Rhino : en SRV, ou un EEP avec ses foreuses), minage en vaisseau, ou autre repère. */
+/** Minage posé au sol (Rhino : en SRV, ou un EEP avec ses foreuses), minage en vaisseau, site gardien, ou autre repère. */
 export function genreRepere(w) {
+  if (w.category === 'guardian') return 'repere-gardien';
   if (w.category !== 'mining') return 'repere';
   return w.vehicle === 'srv' || w.drills != null || w.siteNumber != null ? 'repere-rhino' : 'repere-minage';
 }
@@ -106,7 +108,7 @@ export function routePartageable(vue) {
  */
 export const SOURCES = [
   {
-    kinds: ['repere-rhino', 'repere-minage', 'repere'],
+    kinds: ['repere-rhino', 'repere-minage', 'repere-gardien', 'repere'],
     lire: async (get) => reperesPartageables(await get('/api/modules/waypoints/waypoints')),
   },
   {

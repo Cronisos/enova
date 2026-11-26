@@ -91,7 +91,7 @@ export const PARCOURS_INGENIERIE = [
     etapes: [
       {
         titre: 'Le plan d’un vaisseau',
-        texte: 'Ici tu dis, emplacement par emplacement, ce que tu vises : le module, sa modification, son grade et son effet expérimental. L’app calcule ensuite les matériaux et les ingénieurs qu’il te faut.',
+        texte: 'Ici tu vois, emplacement par emplacement, ce qui est à bord de ton vaisseau, ce que le plan vise et ce qui reste à faire. L’app calcule ensuite les matériaux et les ingénieurs qu’il te faut.',
       },
       {
         cible: t('plan-chiffres'),
@@ -101,17 +101,17 @@ export const PARCOURS_INGENIERIE = [
       {
         cible: t('plan-ligne'),
         titre: 'Un emplacement',
-        texte: 'À gauche, ce qui est monté aujourd’hui. À droite, ce que tu vises : choisis le module, puis la modification, le grade de 1 à 5 et l’effet expérimental. Chaque choix est enregistré tout de suite.',
+        texte: 'À gauche, ce qui est à bord aujourd’hui, d’après ton journal : il est lu quand tu montes dans le vaisseau. À droite, ce que vise le plan : le module, sa modification, son grade et son effet expérimental.',
       },
       {
         cible: t('plan-statut'),
         titre: 'Ce qui reste à faire',
-        texte: 'Au bout de la ligne : « Terminé » quand le module est au niveau visé, sinon le nombre d’applications qui restent. Le signe « ≈ » veut dire que ce nombre est une estimation. Survole la pastille pour le détail.',
+        texte: 'Au bout de la ligne : une coche quand le module est au niveau visé, « à monter » quand le module visé n’est pas celui qui est à bord, et le nombre d’applications qui restent. Le signe « ≈ » veut dire que ce nombre est une estimation. Survole la pastille pour le détail.',
       },
       {
         cible: t('plan-actions'),
         titre: 'Les boutons du plan',
-        texte: '« Tout en G5 » vise d’un coup le grade maximal sur tous les modules modifiables. « Revenir à la config actuelle », pour un de tes vaisseaux, annule tes choix après confirmation. « Supprimer le plan » l’efface pour de bon, après confirmation aussi.',
+        texte: '« Modifier le plan » ouvre les réglages : le module, la modification, le grade et l’effet de chaque emplacement, « Tout en G5 » pour viser d’un coup le grade maximal, et « Revenir à la config actuelle », qui annule tes choix après confirmation. « Supprimer le plan » l’efface pour de bon, après confirmation aussi.',
       },
       {
         cible: t('plan-calculer'),

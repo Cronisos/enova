@@ -364,3 +364,51 @@ que 0,5 al (au plafond de 10 000 résultats de Spansh, ses 10 000 premiers sont 
 `truncated: true`), arrêt dès qu'une page n'apporte rien de nouveau, et une réponse illisible (`count` absent ou pas
 un entier, `results` absent) arrête tout avec une erreur 502 lisible. Avant, une réponse anormale de Spansh faisait
 tourner la recherche sans fin.
+
+## Guide des ressources (Mes repères › Guide des ressources)
+
+Sur quel type de monde chercher, avec le Rhino, les ressources qui se vendent plus de 50 000 cr la tonne. Une carte par
+type de monde (haute teneur en métaux, riche en métaux, rocheux, roche et glace, glacé) avec ce qu'on y trouve, puis
+un tableau ressource par ressource. Deux sources, fondues (`client/src/modules/waypoints/guideRessources.js`) :
+
+- **le tableau de la communauté** transmis par Cronisos Lysiris le 19 nov. 2026 : où une ressource a été trouvée
+  (✓ en contour), où elle ne l'a pas été (✕). Il ne garantit pas sa présence à chaque emplacement ;
+- **tes journaux** (`server/src/modules/waypoints/guide.js`, route `GET /guide`) : chaque tonne raffinée en Rhino,
+  rangée sur la planète où tu étais (approche, atterrissage), dont le type vient de son scan. Case pleine, avec tes
+  tonnes dessous. Le prix affiché est ton meilleur prix de vente (`MarketSell`).
+
+Tes observations l'emportent : une case que le tableau dit vide, ou ne connaît pas, devient « raffinée par toi ». Ce
+qu'aucune des deux ne dit reste « ? ». Une ressource que tu as vendue moins de 50 000 cr, ou jamais vendue, est citée
+sous le tableau plutôt que dedans. Rien ne sort du PC pour ce guide, et rien n'est demandé à un site.
+
+Ce guide a pris la place des captures dans le menu de Mes repères. Le cadre de capture n'est plus ouvert avec le mode
+Minage Rhino (plus de bouton 📷 dans le bandeau) ; les captures déjà prises restent lisibles à `/reperes/captures`.
+
+## Module « Gardiens » (Activités › Gardiens)
+
+Une page, trois onglets (`/gardiens`, `?onglet=sites`, `?onglet=methode`).
+
+**Planificateur.** Les 29 déblocages du courtier en technologie des Gardiens (6 modules, 14 armes, 6 armes modifiées,
+3 chasseurs), à cocher. La page additionne les ingrédients des déblocages cochés, retire ce que tu as en stock (lu par
+HTTP sur `/api/modules/engineering/inventory`, le module Ingénierie) et montre ce qu'il manque, rangé par genre :
+matériaux gardiens, données d'obélisque, matières premières, matériaux fabriqués, marchandises. Une marchandise se
+transporte en soute : son stock n'est pas connu, elle est toujours « à acheter ». « Prête » : tous les matériaux du
+déblocage sont en stock, les déblocages cochés étant servis dans l'ordre sans compter deux fois le même matériau. Le
+nombre de segments de plan manquants donne le nombre d'activations de structure à prévoir. Le choix est gardé dans
+`gardiens-plan.json` (données de l'app), par `PUT /api/modules/gardiens/plan`.
+
+- Recettes : `server/src/modules/gardiens/recettes.js`, recopiées d'EDEngineer le 22 nov. 2026. Les noms français des
+  ingrédients sont notre traduction ; la page préfère le nom du jeu quand l'inventaire le donne.
+- Calcul : `client/src/modules/gardiens/besoins.js` (testé).
+
+**Sites.** Un site gardien est un repère de type « Site Gardien » du module Mes repères : la page les lit et les crée
+par l'API des repères (`/waypoints`, `/waypoints/importer`), sans importer son code. Trois blocs : tes sites (avec
+« Partager à l'escadron », genre de partage `repere-gardien`), ce que l'escadron a partagé (à copier dans tes sites),
+et les structures connues : 49 structures de 2018 (`sites.js`, source galnet.fr d'après Canonn Research, 21 actives),
+à ajouter à tes sites d'un clic. Cette liste n'est pas revérifiée en jeu et ne dit pas quel plan donne chaque
+structure : c'est aux membres de le noter dans le repère puis de le partager.
+
+**Méthode.** Les types de sites et l'activation d'une structure, d'après le même guide, et « Où aller » : pour chaque
+type de plan (module, arme, vaisseau), le site conseillé, les liens vers les cartes des pylônes et l'ordre à suivre
+(`guides.js`, `GET /api/modules/gardiens/guides`). Les cartes restent chez leurs auteurs : l'app n'en copie aucune.
+Trois structures de la liste connue portent ainsi leur type de plan.

@@ -90,6 +90,9 @@ CC BY-NC 4.0) restent la source des identifiants et des attributs des modules, a
 
 | Projet | Usage | Licence |
 | --- | --- | --- |
+| [EDEngineer](https://github.com/msarilar/EDEngineer) (msarilar) | recettes de déblocage de la technologie des Gardiens (Resources/Data/blueprints.json, entrées « Guardian »), recopiées le 22 nov. 2026 (module « Gardiens ») | MIT |
+| [Elite: Dangerous Guides](https://sites.google.com/view/elitedangerousguides) (cartes de u/Mnemoch et CMDR Loch147), [NEWP](https://newp.io/guardian_guide), fil Steam de Low Rider (2018) | sites conseillés par type de plan, ordre des pylônes (reformulé), place des pylônes sur les cartes (relevée à l'œil, cartes de NovaForce et CMDR Cal Dallicort), durée du compte à rebours, coordonnées des pylônes d'un site ; les cartes sont en lien, pas copiées (module « Gardiens ») | pages publiques, sources citées dans l'app |
+| [galnet.fr, « Structures Guardians »](https://galnet.fr/portfolio/bases-guardians/) (CMDR Aymerix, d'après le tableau de [Canonn Research](https://canonn.science/)) | liste de 49 structures gardiennes (système, corps, coordonnées, active ou non) de 2018, et méthode d'activation, reformulée (module « Gardiens ») | page publique, source citée dans l'app |
 | [EDDiscovery / EliteDangerousCore](https://github.com/EDDiscovery/EliteDangerousCore) | formule de valeur des données d'exploration (EstimatedValues.cs) ; adresses Inara et Spansh (Inara.cs, SpanshClass.cs) | Apache 2.0 |
 | [EDCD/EDMarketConnector](https://github.com/EDCD/EDMarketConnector) | adresses Inara des systèmes et stations (plugins/inara.py) | GPL v2 (seules des adresses publiques sont reprises, pas de code) |
 

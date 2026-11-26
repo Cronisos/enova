@@ -27,7 +27,7 @@ const SOURCES = {
   escadron: '/modules/escadron/contribution?preset=week',
 };
 const RAFRAICHIR_MS = 30_000;
-const SESSIONS = new Set(['rescue', 'combat', 'materials', 'shipmining']);
+const SESSIONS = new Set(['rescue', 'combat', 'materials', 'shipmining', 'powerdelivery', 'gardiens', 'rares']);
 
 function useSources(mode) {
   const [d, setD] = useState({});

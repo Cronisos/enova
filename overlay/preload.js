@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('eliteOverlay', {
   setHover: (on) => ipcRenderer.send('hover', Boolean(on)),
   toggleEdit: () => ipcRenderer.send('toggle-edit'),
   grow: (dw, dh) => ipcRenderer.send('grow', Number(dw) || 0, Number(dh) || 0),
+  // Pendant le déplacement : centre la fenêtre de gauche à droite sur son écran (sa hauteur ne bouge pas)
+  centerH: () => ipcRenderer.send('center-h'),
   // Fenêtre à la hauteur de son contenu (Coup d'œil) : la page dit combien il lui faut
   fitHeight: (height) => ipcRenderer.send('fit-height', Number(height) || 0),
   copy: (text) => ipcRenderer.send('copy', String(text).slice(0, 200)),

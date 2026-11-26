@@ -28,11 +28,11 @@ withEdsy('Panther réel : masse et portée identiques à celles calculées par l
 
 withEdsy('lien EDSY : export puis import redonne exactement le même build', () => {
   const { build } = loadoutToBuild(eddb, panther);
-  build.name = 'Panther commerce ⇄ Cemiess';
+  build.name = 'Panther marchand ⇄ Cemiess';
   const url = encodeEdsy(eddb, build);
   assert.match(url, /^https:\/\/edsy\.org\/#\/L=/);
   const back = decodedToBuild(eddb, decodeEdsy(eddb, extractHash(url)));
-  assert.equal(back.name, 'Panther commerce <-> Cemiess'); // « ⇄ » n'existe pas dans le format EDSY
+  assert.equal(back.name, 'Panther marchand <-> Cemiess'); // « ⇄ » n'existe pas dans le format EDSY
   assert.deepEqual(back.slots, build.slots);
   assert.equal(back.shipId, build.shipId);
 });

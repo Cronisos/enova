@@ -128,17 +128,32 @@ test('assemblage : au moins soixante parcours, chaque rubrique présente, aucun 
   // Deux parcours de même adresse et de même sorte : seulement là où c'est voulu (ils se suivent)
   const cles = PARCOURS.map((p) => `${p.chemin}|${p.sousPages === true}`);
   const doubles = [...new Set(cles.filter((c, i) => cles.indexOf(c) !== i))];
-  assert.deepEqual(doubles, ['/builder/build|true', '/fenetres-en-jeu/waypoints|false']);
+  // L'accueil et Paramètres : la touche de la souris d'abord, puis le tour de la page à la visite suivante
+  assert.deepEqual(doubles.sort(), ['/builder/build|true', '/fenetres-en-jeu/waypoints|false', '/parametres|false', '/|false']);
 });
 
 test('page Tutoriels : chaque tutoriel est dans une rubrique, une seule fois, premiers pas d’abord', async () => {
   const { parRubrique, rubriqueDe } = await import('./parcours.js');
   const groupes = parRubrique(PARCOURS);
   assert.equal(groupes[0].rubrique, 'Premiers pas');
-  assert.deepEqual(groupes[0].parcours.map((p) => p.id), ['accueil']);
+  assert.deepEqual(groupes[0].parcours.map((p) => p.id), ['souris-accueil', 'touche-souris', 'accueil'], 'la touche de la souris avant tout');
   assert.equal(groupes.reduce((n, g) => n + g.parcours.length, 0), PARCOURS.length, 'aucun oublié, aucun en double');
   assert.equal(rubriqueDe({ id: 'reperes-liste' }), 'Minage');
   assert.equal(rubriqueDe({ id: 'escadron-chef' }), 'Powerplay et escadron');
   assert.equal(rubriqueDe({ id: 'jeu-combat' }), 'Fenêtres en jeu');
   assert.equal(rubriqueDe({ id: 'commerce' }), 'Commerce');
+});
+
+test('touche de la souris : premier tutoriel de l’accueil, il mène à Paramètres où le second montre la ligne à régler', async () => {
+  const { aLancer } = await import('./moteur.js');
+  const neuf = { actifs: true, vus: [] };
+  const premier = aLancer(PARCOURS, '/', neuf);
+  assert.equal(premier.id, 'souris-accueil');
+  assert.deepEqual([premier.etapes.at(-1).cible, premier.etapes.at(-1).action], ['.topbar-settings', 'clic'], 'il finit par un clic sur Paramètres');
+  const second = aLancer(PARCOURS, '/parametres', { actifs: true, vus: ['souris-accueil'] });
+  assert.equal(second.id, 'touche-souris', 'avant le tour de la page Paramètres');
+  assert.ok(second.etapes.some((e) => e.cible === '[data-tuto="raccourci-souris"]'), 'il encadre la ligne du raccourci de la souris');
+  // Ensuite seulement : le tour de l'accueil, et celui de Paramètres
+  assert.equal(aLancer(PARCOURS, '/', { actifs: true, vus: ['souris-accueil'] }).id, 'accueil');
+  assert.equal(aLancer(PARCOURS, '/parametres', { actifs: true, vus: ['touche-souris'] }).id, 'parametres-page');
 });

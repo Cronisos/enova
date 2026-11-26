@@ -146,6 +146,37 @@ export function modeles(flotte) {
   return [...n].map(([model, nombre]) => ({ model, nombre })).sort((a, b) => b.nombre - a.nombre || a.model.localeCompare(b.model, 'fr'));
 }
 
+/** Filtre « Sans rôle » : les vaisseaux à qui tu n'as donné aucun rôle. */
+export const SANS_ROLE = 'sans-role';
+
+/**
+ * Rôles portés par la flotte et leur nombre de vaisseaux, pour filtrer d'un clic (« ⛏ Minage Rhino ×2 ») : principal
+ * ou secondaire, les plus portés d'abord ; « Sans rôle » à la fin s'il y en a. `tagsDe(vaisseau)` : ses tags
+ * (core/shipRole.js, tagsRole).
+ */
+export function rolesFlotte(flotte, tagsDe) {
+  const vus = new Map();
+  let sans = 0;
+  for (const s of flotte) {
+    const tags = tagsDe(s) || [];
+    if (!tags.length) sans += 1;
+    for (const t of tags) {
+      const r = vus.get(t.id) || { id: t.id, label: t.label, icone: t.icone, couleur: t.couleur, nombre: 0 };
+      r.nombre += 1;
+      vus.set(t.id, r);
+    }
+  }
+  const liste = [...vus.values()].sort((a, b) => b.nombre - a.nombre || a.label.localeCompare(b.label, 'fr'));
+  return sans ? [...liste, { id: SANS_ROLE, label: 'Sans rôle', icone: '', couleur: '#8a94a0', nombre: sans }] : liste;
+}
+
+/** Le vaisseau passe-t-il le filtre de rôle ? (aucun filtre : oui ; « Sans rôle » : aucun tag ; sinon l'un de ses tags) */
+export function passeRole(tags, role) {
+  if (!role) return true;
+  if (role === SANS_ROLE) return !tags?.length;
+  return Boolean(tags?.some((t) => t.id === role));
+}
+
 /** Ordre des cartes : le vaisseau actuel d'abord, puis par modèle, puis par nom. */
 export function ordreFlotte(flotte, titre = (s) => s.name || s.model) {
   return [...flotte].sort((a, b) => Number(Boolean(b.current)) - Number(Boolean(a.current))

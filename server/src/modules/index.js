@@ -15,6 +15,9 @@ import rescue from './rescue/index.js';
 import groundcombat from './groundcombat/index.js';
 import carrier from './carrier/index.js';
 import materials from './materials/index.js';
+import powerdelivery from './powerdelivery/index.js';
+import rares from './rares/index.js';
+import gardiens from './gardiens/index.js';
 import shipmining from './shipmining/index.js';
 import signals from './signals/index.js';
 import navroute from './navroute/index.js';
@@ -32,6 +35,7 @@ import regles from './regles/index.js';
 import escadron from './escadron/index.js';
 import whereto from './whereto/index.js';
 import bilan from './bilan/index.js';
+import hangar from './hangar/index.js';
 import systeme from './systeme/index.js';
 
 export const OPTIONNELS = ['ia'];
@@ -41,4 +45,4 @@ for (const id of OPTIONNELS) {
   if (fs.existsSync(fichier)) facultatifs.push((await import(fichier.href)).default);
 }
 
-export const modules = [routes, engineering, builder, planner, waypoints, systems, expansion, whereto, regles, escadron, shipmining, combat, groundcombat, rescue, materials, colonisation, carrier, signals, navroute, fsdcool, bindings, links, glance, hudcolours, compagnon, bilan, systeme, ...facultatifs];
+export const modules = [routes, engineering, builder, planner, waypoints, systems, expansion, whereto, regles, escadron, shipmining, combat, groundcombat, rescue, powerdelivery, rares, gardiens, materials, colonisation, carrier, signals, navroute, fsdcool, bindings, links, glance, hudcolours, compagnon, bilan, hangar, systeme, ...facultatifs];

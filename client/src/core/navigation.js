@@ -53,6 +53,7 @@ export const PLAN = Object.freeze([
     id: 'activites', titre: 'Activités', icone: '◎', chemin: '/activites', description: 'Ce que tu fais en jeu',
     enfants: [
       { id: 'commerce', titre: 'Commerce', icone: '⇄', chemin: '/routes', description: 'Tes routes commerciales et leurs gains' },
+      { id: 'commerce-rares', titre: 'Commerce de rares', icone: '◆', chemin: '/commerce-rares', description: 'Marchandises rares : mérites, taux horaire, bénéfice' },
       {
         id: 'minage', titre: 'Minage', icone: '⛏︎', chemin: '/reperes', description: 'Au Rhino ou en vaisseau',
         enfants: [
@@ -64,6 +65,15 @@ export const PLAN = Object.freeze([
       { id: 'combat-sol', titre: 'Combat au sol', icone: '🪖', chemin: '/combat-au-sol', description: 'Zones de conflit à pied, kills, mérites' },
       { id: 'sauvetage', titre: 'Sauvetage', icone: '✚', chemin: '/sauvetage', description: 'Nacelles récupérées et livrées' },
       { id: 'collecte', titre: 'Collecte de matériaux', icone: '◈', chemin: '/materiaux', description: 'Matériaux récupérés pendant la session' },
+      { id: 'livraison-powerplay', titre: 'Livraison Powerplay', icone: '▤', chemin: '/livraison-powerplay', description: 'Ressources de ta puissance : soute, livraisons, mérites' },
+      {
+        id: 'gardiens', titre: 'Gardiens', icone: '◬', chemin: '/gardiens', description: 'Ce que tu veux débloquer, ce qu’il te manque, les sites',
+        enfants: [
+          { id: 'gardiens-plan', titre: 'Planificateur', chemin: '/gardiens' },
+          { id: 'gardiens-sites', titre: 'Sites', chemin: '/gardiens?onglet=sites' },
+          { id: 'gardiens-methode', titre: 'Méthode', chemin: '/gardiens?onglet=methode' },
+        ],
+      },
       { id: 'colonisation', titre: 'Colonisation', icone: '▣', chemin: '/colonisation', description: 'Tes chantiers et ce qu’il leur manque' },
       { id: 'bilans', titre: 'Bilans de session', icone: '▦', chemin: '/bilans', description: 'Tes sessions de jeu, comparées' },
     ],

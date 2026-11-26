@@ -10,14 +10,14 @@ test('fenêtres à disposer : la principale de chaque module et ses fenêtres en
   const modules = [
     { id: 'waypoints', title: 'Mes repères', Hud: X, hudPages: { 'waypoints-sweep': X, 'waypoints-sweep-top': X, 'waypoints-sweep-pose': X } },
     { id: 'links', title: 'Applications externes' },
-    { id: 'fsdcool', title: 'Refroidissement FSD', Hud: X },
+    { id: 'fsdcool', title: 'Refroidissement SCO', Hud: X },
     { id: 'combat', title: 'Combat', Hud: X },
     { id: 'autre', title: 'Autre', hudPages: { 'waypoints-sweep': X } },
   ];
   assert.deepEqual(fenetresOverlay(modules), [
     { page: 'waypoints', nom: 'Minage Rhino' },
     { page: 'waypoints-sweep', nom: 'Balayage de l’EEP' },
-    { page: 'fsdcool', nom: 'FSD prêt' },
+    { page: 'fsdcool', nom: 'Refroidissement SCO' },
     { page: 'combat', nom: 'Combat' },
   ]);
   assert.equal(nomFenetre('inconnue'), 'inconnue');

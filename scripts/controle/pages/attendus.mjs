@@ -145,7 +145,7 @@ export const APP = {
   // (« Rangs des ingénieurs » du plan) puis le Dashboard (même montée, comptée une fois) doivent le montrer.
   '/ingenierie/plan/:id': {
     seances: {
-      depuis: { url: '/ingenierie/nouveau-plan', cliquer: ['Créer un plan', 'Tout en G5'], ecrit: true },
+      depuis: { url: '/ingenierie/nouveau-plan', cliquer: ['Créer un plan', 'Modifier le plan', 'Tout en G5'], ecrit: true },
       url: /^\/ingenierie\/plan\/\d+$/,
       textes: ['Type-11 Prospector · TS-03', 'Matériaux réunis', 'Modules terminés', 'Supprimer le plan', 'dont 10 dues aux rangs des ingénieurs'],
     },
@@ -256,11 +256,21 @@ export const APP = {
   },
 
   // --- Mes repères (et le mode Minage Rhino) ---
+  // Accueil : la recherche par minerai, sous les onglets de la page (refonte du 19 nov. 2026)
   '/reperes': {
     titre: 'Mes repères',
-    textes: ['Tu es ici', 'Tous mes repères', 'Captures', 'Sessions passées', 'Systèmes prospectés'],
-    seances: ['TST-001', 'Synuefe OU-E c28-2', '3 planètes à EEP', 'Un EEP est rentable à partir de 6/10.'],
+    textes: ['Tu es ici', 'Chercher', 'Ici', 'Cartes d’EEP', 'Guide'],
+    vide: ['Position inconnue : lance le jeu.', 'Aucun gisement connu pour l’instant.'],
+  },
+  '/reperes/ici': {
+    titre: 'Mes repères',
+    textes: ['Tu es ici', 'Chercher', 'Ici'],
+    seances: ['Synuefe OU-E c28-2', '3 planètes à EEP', 'Un EEP est rentable à partir de 6/10.'],
     vide: ['Position inconnue : lance le jeu.'],
+  },
+  '/reperes/guide': {
+    titre: 'Mes repères',
+    textes: ['Guide des ressources', 'Par type de monde', 'Par ressource'],
   },
   '/reperes/liste': {
     titre: 'Mes repères',
@@ -276,7 +286,7 @@ export const APP = {
   '/reperes/historique': { titre: 'Mes repères', textes: ['Aucune session terminée.'] },
   '/reperes/systemes': { titre: 'Mes repères', textes: ['Aucun système prospecté pour l’instant.'] },
   '/reperes/planete/:body': {
-    seances: { depuis: { url: '/reperes', cliquer: '🪐 2' }, url: /^\/reperes\/planete\/[^/]+$/, textes: ['Synuefe OU-E c28-2', '🪐 2', '0 EEP vus sur 20', 'Emplacements'] },
+    seances: { depuis: { url: '/reperes/ici', cliquer: '🪐 2' }, url: /^\/reperes\/planete\/[^/]+$/, textes: ['Synuefe OU-E c28-2', '🪐 2', '0 EEP vus sur 20', 'Emplacements'] },
     vide: { url: '/reperes/planete/Synuefe%20OU-E%20c28-2%202', textes: ['Aucun EEP connu sur cette planète.'] },
   },
   '/reperes/planete/:body/eep/:n': {
@@ -284,7 +294,7 @@ export const APP = {
     vide: { url: '/reperes/planete/Synuefe%20OU-E%20c28-2%202/eep/1', textes: ['Planète inconnue dans ce système.'] },
   },
   '/reperes/repere/:id': {
-    seances: { depuis: { url: '/reperes', cliquer: '📍 Marquer ici', ecrit: true }, url: /^\/reperes\/repere\/\d+$/, textes: ['TST-001 · 7 nov., 15:23', "C'est quoi ?", 'Notes'] },
+    seances: { depuis: { url: '/reperes/ici', cliquer: '📍 Marquer ici', ecrit: true }, url: /^\/reperes\/repere\/\d+$/, textes: ['TST-001 · 7 nov., 15:23', "C'est quoi ?", 'Notes'] },
     vide: { url: '/reperes/repere/1', textes: ['Repère introuvable (supprimé ?).'] },
   },
 
@@ -317,6 +327,18 @@ export const APP = {
     textes: ['Récupérés', 'Bruts', 'Manufacturés', 'Encodés'],
     seances: ['Session depuis 09:15', 'Sélénium', 'Tellure', 'G1 : 45'],
     vide: ['Session non commencée'],
+  },
+  '/livraison-powerplay': {
+    titre: 'Livraison Powerplay',
+    textes: ['En soute', 'Livrées', 'Mérites / heure', 'Par ressource'],
+  },
+  '/commerce-rares': {
+    titre: 'Commerce de rares',
+    textes: ['Mérites / heure', 'Bénéfice', 'En soute', 'Par marchandise', 'Catalogue des rares'],
+  },
+  '/gardiens': {
+    titre: 'Gardiens',
+    textes: ['Planificateur', 'Booster de FSD gardien', 'Ce qu’il te faut'],
   },
   '/colonisation': {
     titre: 'Colonisation',
@@ -472,6 +494,10 @@ export const HUD = {
   // Bilan en jeu : ouvert par le serveur à la fermeture du jeu ou au changement de mode ; ouvert sans bilan, il le dit
   bilan: { textes: ['Bilan de la session', 'Aucun bilan pour l’instant.'] },
   vigie: { textes: ['Règle à revoir', 'Aucune règle à revoir.'] },
+  // Alerte de hangar : ouverte par le serveur à un décollage en direct ; ouverte sans alerte, elle le dit
+  'hangar-vide': { textes: ['Hangar sans véhicule', 'Aucun hangar vide.'] },
+  // Alerte de rares : ouverte par le serveur après un relevé du catalogue ; ouverte sans alerte, elle le dit
+  'rares-alerte': { textes: ['Rares en stock', 'Aucune alerte de rares.'] },
   combat: { textes: ['⚔ Combat', "aucun kill pour l'instant"], seances: ['pause · jeu fermé'], vide: ['en direct'] },
   groundcombat: { textes: ['🪖 Combat au sol', 'Kills', 'Gains', 'Mérites'], vide: ['en direct'] },
   rescue: { textes: ['Sauvetage', 'Nacelles', 'Boîtes noires'], seances: ['3 788', '2,5 M', "Livré : 7 × Nacelle d'évacuation endommagée"], vide: ['en direct'] },
@@ -494,6 +520,10 @@ export const HUD = {
     vide: ["Aucun signal utile pour l'instant."],
   },
   navroute: { rien: true }, // pas d'itinéraire tracé (NavRoute.json absent des séances)
+  powerdelivery: { textes: ['Livraison Powerplay', 'En soute', 'Mérites / h', 'Recharge'] },
+  rares: { textes: ['Commerce de rares', 'En soute', 'Mérites / h', 'Bénéfice'] },
+  gardiens: { textes: ['Gardiens', 'Plans', 'Ramassés'] },
+  'gardiens-site': { textes: ['Site gardien', 'Aucun site gardien en vue.'] },
   fsdcool: { rien: true }, // pas de refroidissement en cours (Status.json absent des séances)
   bindings: {
     seances: { rien: true }, // le rapport d'erreurs date d'avant le dernier lancement : rien à signaler
@@ -554,10 +584,16 @@ export const FENETRES = {
     'engineering-passage': { apres: ['Utile ici pour tes plans'] },
     bilan: { apres: ['Bilan'] },
     vigie: { apres: ['Aucune règle à revoir.'] },
+    'hangar-vide': { apres: ['Aucun hangar vide.'] },
+    'rares-alerte': { apres: ['Aucune alerte de rares.'] },
     combat: { apres: ['pause · jeu fermé', PROPOSE] },
     groundcombat: { apres: ['Kills'] },
     rescue: { apres: ['Nacelles', 'Récompenses', '2,5 M', 'pause · jeu fermé', PROPOSE] },
     materials: { apres: ['Bruts', '76', 'pause · jeu fermé', PROPOSE] },
+    powerdelivery: { apres: ['En soute', 'Mérites / h'] },
+    rares: { apres: ['En soute', 'Mérites / h'] },
+    gardiens: { apres: ['Plans', 'Ramassés'] },
+    'gardiens-site': { apres: ['Aucun site gardien en vue.'] },
     colonisation: { apres: [PROPOSE] }, // pas de chantier dans cette séance
     'colonisation-list': { apres: ['Aucun chantier suivi'] },
     'colonisation-station': { apres: ['Ouvre le marché d’une station'] },

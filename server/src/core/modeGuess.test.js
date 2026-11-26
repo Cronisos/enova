@@ -190,3 +190,20 @@ test('silence de « Non » : lisible par mode (la bascule au relog en dépend), 
   assert.equal(a.silenced('constructor'), false);
   assert.equal(a.silenced(undefined), false);
 });
+
+test('matériau des Gardiens ramassé : mode Gardiens dès le premier ; un autre matériau : rien', () => {
+  assert.deepEqual(guessFromEvent({ event: 'MaterialCollected', Name: 'guardian_powercell', Count: 3 }), { mode: 'gardiens', reason: 'matériau gardien ramassé' });
+  assert.equal(guessFromEvent({ event: 'MaterialCollected', Name: 'ancienttechnologicaldata', Count: 1 }).mode, 'gardiens');
+  assert.equal(guessFromEvent({ event: 'MaterialCollected', Name: 'iron', Count: 3 }), null);
+  assert.equal(guessFromEvent({ event: 'MaterialCollected' }), null);
+});
+
+test('approche d’un site gardien : mode Gardiens ; une colonie ordinaire : rien', () => {
+  assert.deepEqual(guessFromEvent({ event: 'ApproachSettlement', Name: '$Ancient_Small_002:#index=1;' }), { mode: 'gardiens', reason: 'site gardien en vue' });
+  assert.equal(guessFromEvent({ event: 'ApproachSettlement', Name: 'Gibbs Hydroponics Site' }), null);
+});
+
+test('marchandise rare achetée : mode Commerce de rares ; une marchandise ordinaire : rien', () => {
+  assert.deepEqual(guessFromEvent({ event: 'MarketBuy', Type: 'kamitracigars', Count: 102 }), { mode: 'rares', reason: 'marchandise rare achetée' });
+  assert.equal(guessFromEvent({ event: 'MarketBuy', Type: 'gold', Count: 50 }), null);
+});

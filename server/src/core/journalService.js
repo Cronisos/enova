@@ -12,6 +12,7 @@
 // plusieurs comptes peuvent écrire dans le même dossier, et un ShipID n'est unique que pour un commandant.
 // Seules les séances de la galaxie Live sont publiées : une partie Legacy ou bêta (core/galaxy.js) ne touche ni à
 // l'historique, ni aux événements en direct, ni aux fichiers d'état.
+// Le Loadout du vaisseau d'un autre commandant (équipage multijoueur, core/autrui.js) n'est ni gardé ni publié.
 //
 // Pourquoi un sondage (polling) plutôt que des notifications du système de fichiers ?
 // Sous Windows, le jeu garde ses fichiers ouverts et les notifications arrivent de
@@ -25,6 +26,7 @@ import { setImmediate as laisserPasser } from 'node:timers/promises';
 import { journalSortKey, journalStartTime, listJournals, parseLines, readJsonFile } from './journalFiles.js';
 import { GALAXY_EVENTS, galaxyOf } from './galaxy.js';
 import { COMMANDER, CommanderTracker } from './commander.js';
+import { loadoutDAutrui, suiteAutrui } from './autrui.js';
 
 const TICK_MS = 500;
 // Relecture de l'historique par morceaux : entre deux morceaux, le serveur répond aux requêtes, au flux temps réel
@@ -149,6 +151,7 @@ export class JournalService extends EventEmitter {
     this.skipped = new Map(); // journal illisible pendant la relecture de l'historique → code d'erreur (réessayé)
     this.skippedRetryAt = 0;
     this.galaxy = 'live'; // galaxie de la séance suivie (core/galaxy.js) : seule la galaxie Live est publiée
+    this.autrui = false; // à bord du vaisseau d'un autre commandant (core/autrui.js) : son Loadout n'est pas publié
     this.pos = 0; // position de lecture (octets)
     this.partial = Buffer.alloc(0); // fin de ligne pas encore terminée
     this.interest = new Set();
@@ -268,6 +271,7 @@ export class JournalService extends EventEmitter {
     this.skipped = new Map();
     this.skippedRetryAt = Date.now() + SKIPPED_RETRY_MS;
     this.galaxy = 'live';
+    this.autrui = false;
     this.commanders = new CommanderTracker();
     return this.load(run);
   }
@@ -298,6 +302,7 @@ export class JournalService extends EventEmitter {
       this.pos = read.pos;
       this.partial = read.partial;
       this.galaxy = read.galaxy;
+      this.autrui = read.autrui;
       if (!(await this.emitReady(read.history, run))) return; // abandonnée pendant la remise aux modules
       // 3. Suivi en temps réel
       this.follow();
@@ -357,7 +362,7 @@ export class JournalService extends EventEmitter {
     // Fileheader et LoadGame toujours analysés : ils disent la galaxie, même si aucun module ne les demande
     // Commander aussi : le commandant chargé est noté sur chaque événement
     const parsed = new Set([...this.interest, ...GALAXY_EVENTS, ...COMMANDER_EVENTS]);
-    const out = { history: null, file: null, pos: 0, partial: Buffer.alloc(0), galaxy: 'live' };
+    const out = { history: null, file: null, pos: 0, partial: Buffer.alloc(0), galaxy: 'live', autrui: false };
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const isLast = i === files.length - 1;
@@ -396,10 +401,13 @@ export class JournalService extends EventEmitter {
         out.pos = taille;
       }
       buf = null;
-      const etat = { galaxy: 'live' }; // chaque journal ouvre sa séance par un Fileheader
+      const etat = { galaxy: 'live', autrui: false }; // chaque journal ouvre sa séance par un Fileheader
       if (!(await this.parseInto(history, complete, run, parsed, etat))) return null;
-      this.seen.set(file, { pos: taille, galaxy: etat.galaxy });
-      if (isLast) out.galaxy = etat.galaxy;
+      this.seen.set(file, { pos: taille, galaxy: etat.galaxy, autrui: etat.autrui });
+      if (isLast) {
+        out.galaxy = etat.galaxy;
+        out.autrui = etat.autrui;
+      }
     }
     out.history = history.done();
     return out;
@@ -422,6 +430,8 @@ export class JournalService extends EventEmitter {
       for (const ev of parseLines(buf.toString('utf8', from, to), parsed)) {
         if (GALAXY_SET.has(ev.event)) etat.galaxy = nextGalaxy(etat.galaxy, ev);
         if (etat.galaxy !== 'live') continue; // séance Legacy ou bêta : rien n'en est gardé
+        etat.autrui = suiteAutrui(etat.autrui, ev);
+        if (loadoutDAutrui(ev, etat.autrui)) continue; // fiche du vaisseau d'un autre commandant : jamais la tienne
         this.tagCommander(ev);
         if (this.interest.has(ev.event)) history.push(ev);
       }
@@ -533,7 +543,7 @@ export class JournalService extends EventEmitter {
       } catch (err) {
         if (err.code !== 'ENOENT') throw err;
       }
-      this.seen.set(this.file, { pos: this.pos, galaxy: this.galaxy });
+      this.seen.set(this.file, { pos: this.pos, galaxy: this.galaxy, autrui: this.autrui });
     }
     // Journal déjà lu qui redevient le plus récent (le journal actif a été déplacé ou supprimé) : on reprend où on en
     // était. Avant, il était relu depuis le début et toutes ses lignes republiées comme nouvelles (mérites et matériaux
@@ -542,6 +552,7 @@ export class JournalService extends EventEmitter {
     this.file = newest;
     this.pos = known?.pos ?? 0;
     this.galaxy = known?.galaxy ?? 'live';
+    this.autrui = known?.autrui ?? false;
     this.partial = Buffer.alloc(0);
     this.emit('switch', path.basename(newest));
   }
@@ -576,6 +587,8 @@ export class JournalService extends EventEmitter {
       for (const ev of parseLines(data.subarray(0, lastNl + 1).toString('utf8'))) {
         if (GALAXY_SET.has(ev.event)) this.galaxy = nextGalaxy(this.galaxy, ev);
         if (this.galaxy !== 'live') continue; // partie Legacy ou bêta : rien n'est publié (core/galaxy.js)
+        this.autrui = suiteAutrui(this.autrui, ev);
+        if (loadoutDAutrui(ev, this.autrui)) continue; // fiche du vaisseau d'un autre commandant (core/autrui.js)
         this.tagCommander(ev);
         this.lastEventAt = new Date();
         this.recent.push(recentEntry(ev));

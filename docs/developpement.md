@@ -246,7 +246,7 @@ pages du cœur (accueil, paramètres, page inconnue), chaque onglet listé, et c
 des modules clients : `Hud`, `hudPages` et `hudExtras`), deux fois : avec le pont de l'overlay simulé (`scripts/controle/pages/pont.mjs`,
 mêmes fonctions que `overlay/preload.js`, comme dans le jeu), puis dans un navigateur ordinaire. Les routes à paramètre
 sont ouvertes par un parcours d'utilisateur (« Build depuis ce vaisseau », nom tapé au clavier, « Enregistrer le
-build » ; « Créer un plan » puis « Tout en G5 », « Calculer » et le Dashboard, où le coût des rangs d'ingénieur doit
+build » ; « Créer un plan » puis « Modifier le plan », « Tout en G5 », « Calculer » et le Dashboard, où le coût des rangs d'ingénieur doit
 paraître ; « 📍 Marquer ici »…), joué à la fin, quand toutes les lectures sont faites, ou par une adresse qui n'existe
 pas encore (« Build introuvable. »).
 
@@ -441,6 +441,14 @@ node dbPush.mjs --nouvelle-migration "colonne rôle ajoutée"
 schéma). Relis-le et complète-le si des données doivent suivre. `dbPush.test.mjs` vérifie que les migrations mènent
 exactement au schéma : un changement du schéma sans sa migration fait échouer les tests.
 
+### Vaisseau d'un autre commandant
+
+À bord du vaisseau d'un autre joueur (équipage multijoueur, ou ton SRV rentré dans son hangar), le jeu écrit dans ton
+journal le `Loadout` de son vaisseau, avec son numéro et son immatriculation. Le lecteur des journaux l'écarte à la
+source (`server/src/core/autrui.js`), de l'historique comme du direct : aucun module ne le voit, il n'entre ni dans la
+flotte, ni dans l'état du jeu, ni dans le rachat. Il est reconnu à sa forme (ni `HullValue` ni `ModulesValue`, `Rebuy`
+à 0) ou à la situation (du `JoinACrew` ou de l'`Embark` `Multicrew` jusqu'au retour dans ton vaisseau).
+
 ### Plusieurs commandants sur le même PC
 
 Le ShipID du jeu n'est unique que pour un commandant : le vaisseau n° 1 d'un second compte n'est pas celui du compte
@@ -542,6 +550,7 @@ client/                React + Vite
   src/modules/carrier/ fenêtre en jeu du saut du porteur
   src/modules/signals/ fenêtre en jeu des signaux du système
   src/modules/navroute/ fenêtre en jeu de l'itinéraire
+  src/modules/hangar/  alerte en jeu au décollage avec un hangar acheté mais sans véhicule
   src/modules/fsdcool/ fenêtre en jeu du refroidissement FSD et du « SCO prêt »
   src/modules/bindings/ module « Garde des commandes » : bandeau, fenêtre en jeu, page /commandes
   src/modules/links/   module « Applications externes »
@@ -591,6 +600,10 @@ server/                Node.js + Express
   src/modules/combat/  module Combat : kills, primes, mérites de la session, tests
   src/modules/rescue/  module Sauvetage : récupérations, livraisons, mérites de la session, tests
   src/modules/materials/ mode Matériaux : matériaux récupérés pendant la session, tests
+  src/modules/gardiens/      technologie des Gardiens : recettes de déblocage, structures connues, plan du joueur, tests
+  src/modules/rares/         mode Commerce de rares : marchandises rares achetées et vendues, mérites, bénéfice ; catalogue
+                             des rares (Spansh) et alerte de stock ; tests
+  src/modules/powerdelivery/ mode Livraison Powerplay : ressources de ta puissance chargées et livrées, mérites, tests
   src/modules/colonisation/ module Colonisation : lecture des événements (events.js), chantiers (state.js), liste de
                        courses et fin estimée (plan.js), stations proches (sources.js), API, tests sur exemples
                        documentés (fixtures/examples.js)

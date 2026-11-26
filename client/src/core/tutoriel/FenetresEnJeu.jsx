@@ -10,7 +10,7 @@ import { PARAMETRE_DEMO } from '../demo.js';
 /** Taille d'affichage de chaque fenêtre dans la page (proche de sa taille par défaut en jeu, overlay/main.js). */
 export const TAILLES = {
   waypoints: [590, 124], 'waypoints-list': [380, 440], 'waypoints-guide': [320, 210], 'waypoints-sweep': [620, 520],
-  shipmining: [700, 124], combat: [700, 124], groundcombat: [700, 124], rescue: [700, 150], materials: [700, 124],
+  shipmining: [700, 124], combat: [700, 124], groundcombat: [700, 124], rescue: [700, 150], materials: [700, 124], powerdelivery: [700, 124], rares: [700, 124], gardiens: [700, 124], 'gardiens-site': [520, 200],
   colonisation: [700, 124], 'colonisation-list': [380, 440], glance: [480, 460],
   navroute: [340, 236], signals: [360, 380], systeme: [420, 190],
 };
@@ -20,7 +20,7 @@ const TAILLE_DEFAUT = [700, 124];
 export const NOMS = {
   waypoints: 'Bandeau du minage', 'waypoints-list': 'Liste des repères', 'waypoints-guide': 'Guidage', 'waypoints-sweep': 'Balayage',
   shipmining: 'Bandeau du minage en vaisseau', combat: 'Bandeau du combat', groundcombat: 'Bandeau du combat au sol',
-  rescue: 'Bandeau du sauvetage', materials: 'Bandeau des matériaux', colonisation: 'Bandeau de la colonisation',
+  rescue: 'Bandeau du sauvetage', materials: 'Bandeau des matériaux', powerdelivery: 'Bandeau de la livraison Powerplay', rares: 'Bandeau du commerce de rares', gardiens: 'Bandeau des Gardiens', 'gardiens-site': 'Site gardien : carte et pylônes', colonisation: 'Bandeau de la colonisation',
   'colonisation-list': 'Liste de courses', glance: 'Coup d’œil',
   navroute: 'Itinéraire', signals: 'Signaux du système', systeme: 'Moniteur du PC',
 };
